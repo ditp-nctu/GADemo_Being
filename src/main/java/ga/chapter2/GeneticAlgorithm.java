@@ -1,4 +1,4 @@
-package art.cctcc.workshop.ga.chapter2;
+package ga.chapter2;
 
 /**
  * The GeneticAlgorithm class is our main abstraction for managing the

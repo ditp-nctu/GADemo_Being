@@ -1,4 +1,5 @@
-package art.cctcc.workshop.ga.chapter2;
+
+package ga.chapter2;
 
 /**
  * An "Individual" represents a single candidate solution. The core piece of

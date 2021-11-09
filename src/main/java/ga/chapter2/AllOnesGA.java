@@ -1,4 +1,4 @@
-package art.cctcc.workshop.ga.chapter2;
+package ga.chapter2;
 
 /**
  * This is our main class used to run the genetic algorithm.

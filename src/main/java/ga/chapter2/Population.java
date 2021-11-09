@@ -1,4 +1,4 @@
-package art.cctcc.workshop.ga.chapter2;
+package ga.chapter2;
 
 import java.util.Arrays;
 import java.util.Comparator;
