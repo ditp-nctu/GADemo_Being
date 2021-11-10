@@ -21,14 +21,19 @@ import processing.core.PApplet;
  *
  * @author Jonathan Chang, Chun-yien <ccy@cctcc.art>
  */
-public class GADemoBeing extends PApplet {
+public class Main extends PApplet {
 
   int beingNo;
-  Being[] beings;
+
+  BeingDemoGA ga;
+  BeingPopulation population;
+  // Keep track of current generation
+  int generation = 1;
+  int timer = 0;
+  int sec = 2;
 
   @Override
   public void settings() {
-//  size(canvas, canvas);
     fullScreen();
   }
 
@@ -37,52 +42,41 @@ public class GADemoBeing extends PApplet {
     rectMode(CENTER);
     stroke(255);
     noFill();
+    frameRate(120);
     beingNo = 100 * width / 3840;
-    beings = new Being[beingNo];
-    for (int i = 0; i < beingNo; i++) {
-      beings[i] = new Being();
-      var size = beings[i].getSize();
-      beings[i].setX((int) random(width - size * 2) + size);
-      beings[i].setY((int) random(height - size * 2) + size);
-      beings[i].setColor((int) random(255));
-    }
+    ga = new BeingDemoGA(beingNo, 0.001, 0.95, beingNo / 10, width, height);
+    // Initialize population
+    population = ga.initPopulation();
+    // Evaluate population
+    ga.evalPopulation(population);
+  }
+
+  @Override
+  public void mouseClicked() {
+
+    population = ga.initPopulation();
+    ga.evalPopulation(population);
   }
 
   @Override
   public void draw() {
+
     background(128);
-    for (int i = 0; i < beingNo; i++) {
-      Being b = beings[i];
+    for (var i = 0; i < beingNo; i++) {
+      Being b = population.getIndividuals()[i];
       stroke(b.getColor());
-      //System.out.printf("size=%.2f, x=%.2f, y=%.2f\n", b.size, b.x, b.y);
       pushMatrix();
       translate(b.getX(), b.getY());
-      float size = b.getSize();
-      //float score = 0;
-      int ring = 0;
-      for (int j = 0; j < Being.max_ring; j++) {
-        ring++;
-        //System.out.printf("Ring#%d: size=%.2f ", j, size);
-        //float scoreDelta = 0;      
+      var size = b.getSize();
+
+      for (int j = 0; j < b.getRing() - 1; j++) {
         if (j % 2 == 0) {
           circle(0, 0, size);
-          //if (j>0) {
-          //  scoreDelta=delta[j-1];
-          //}
         } else {
-          rotate(PI / (float) b.getDelta()[j - 1]);
+          rotate(PI / (float) b.getDelta()[j - 1] * (b.isClockwise() ? 1 : -1));
           rect(0, 0, size, size);
-          //scoreDelta=abs(delta[j-1]-size*(sqrt(2)-1));
         }
-        //System.out.printf("scoreDelta=%.2f ", scoreDelta);
-        //score+=scoreDelta;
-        //delta[j] = random(0, size/max_ring*2);
-        //delta[j] = j%2==0?size*(1-1/sqrt(2)):0;
         size -= b.getDelta()[j];
-        if (size < 0) {
-          break;
-        }
-        //System.out.printf("delta = %.2f\n", delta[j]);
       }
       popMatrix();
       b.move();
@@ -90,13 +84,25 @@ public class GADemoBeing extends PApplet {
               || b.getY() + b.getSize() / 2 > height || b.getY() - b.getSize() / 2 < 0) {
         b.reverseDir();
       }
-      //System.out.printf(": ring=%d, %.2f(%.2f%%)\n", 
-      //  ring, score/(ring-1), 1.0/(score/(ring-1)+1.0)*100);
+    }
+    if (timer++ > frameRate * sec) {
+      timer = 0;
+      // Print fittest individual from population
+//      System.out.println("Best solution: " + population.getFittest(0));
+      System.out.println("Generation = " + generation);
+      // Apply crossover
+      population = ga.crossoverPopulation(population);
+      // Apply mutation
+      population = ga.mutatePopulation(population);
+      // Evaluate population
+      ga.evalPopulation(population);
+      // Increment the current generation
+      generation++;
     }
   }
 
   public static void main(String[] args) {
     System.setProperty("sun.java2d.uiScale", "1.0");
-    PApplet.main(GADemoBeing.class);
+    PApplet.main(Main.class);
   }
 }
