@@ -10,7 +10,8 @@ import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 public class Being extends Individual {
 
   public static int max_ring = 25;
@@ -47,15 +48,31 @@ public class Being extends Individual {
     this.size = r.nextInt(max_size - min_size) + min_size;
     this.color = r.nextInt(256);
     float current_size = this.size;
-    this.ring = 1;
+    this.ring = 0;
     for (int j = 0; j < max_ring - 1; j++) {
       delta[j] = (int) (Math.random() * (current_size / (max_ring - this.ring++))) + 1;
       current_size -= delta[j];
-      if (current_size <= 0) break;
+      if (current_size <= 0) {
+        break;
+      }
     }
     this.clockwise = Math.random() > 0.5;
-    System.out.printf("Ring=%d, delta=%s\n", ring, Arrays.toString(delta));
+//    System.out.printf("Ring=%d, delta=%s\n", ring, Arrays.toString(delta));
     this.changeDir(0);
+  }
+
+  public int refreshRing() {
+
+    this.ring = 1;
+    float current_size = this.size;
+    for (int i = 0; i < max_ring - 1; i++) {
+      current_size -= delta[i];
+      if (current_size <= 0) {
+        break;
+      }
+      ring++;
+    }
+    return this.ring;
   }
 
   public String getSizeGene() {
@@ -92,13 +109,7 @@ public class Being extends Individual {
     for (int i = 0; i < delta.length; i++) {
       delta[i] = Integer.parseInt(chromosome.substring(8 + i * 8, 8 + i * 8 + 8), 2);
     }
-    this.ring = 1;
-    float current_size = this.size;
-    for (int j = 0; j < max_ring - 1; j++) {
-      current_size -= delta[j];
-      if (current_size <= 0) break;
-      this.ring++;
-    }
+    this.refreshRing();
   }
 
   public void move() {
@@ -117,9 +128,13 @@ public class Being extends Individual {
     }
   }
 
-  public void reverseDir() {
+  public void reverseDir(String direction) {
 
-    this.dx = -this.dx;
-    this.dy = -this.dy;
+    switch (direction) {
+      case "x" ->
+        this.dx = -this.dx;
+      case "y" ->
+        this.dy = -this.dy;
+    }
   }
 }

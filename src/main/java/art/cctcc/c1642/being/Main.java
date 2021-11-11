@@ -30,7 +30,7 @@ public class Main extends PApplet {
   // Keep track of current generation
   int generation = 1;
   int timer = 0;
-  int sec = 2;
+  double sec = 1.5;
 
   @Override
   public void settings() {
@@ -44,7 +44,7 @@ public class Main extends PApplet {
     noFill();
     frameRate(120);
     beingNo = 100 * width / 3840;
-    ga = new BeingDemoGA(beingNo, 0.001, 0.95, beingNo / 10, width, height);
+    ga = new BeingDemoGA(beingNo, 0.5, 0.95, beingNo / 10, width, height);
     // Initialize population
     population = ga.initPopulation();
     // Evaluate population
@@ -80,16 +80,14 @@ public class Main extends PApplet {
       }
       popMatrix();
       b.move();
-      if (b.getX() + b.getSize() / 2 > width || b.getX() - b.getSize() / 2 < 0
-              || b.getY() + b.getSize() / 2 > height || b.getY() - b.getSize() / 2 < 0) {
-        b.reverseDir();
+      if (b.getX() + b.getSize() / 2 > width || b.getX() - b.getSize() / 2 < 0) {
+        b.reverseDir("x");
+      } else if (b.getY() + b.getSize() / 2 > height || b.getY() - b.getSize() / 2 < 0) {
+        b.reverseDir("y");
       }
     }
     if (timer++ > frameRate * sec) {
       timer = 0;
-      // Print fittest individual from population
-//      System.out.println("Best solution: " + population.getFittest(0));
-      System.out.println("Generation = " + generation);
       // Apply crossover
       population = ga.crossoverPopulation(population);
       // Apply mutation
@@ -97,6 +95,8 @@ public class Main extends PApplet {
       // Evaluate population
       ga.evalPopulation(population);
       // Increment the current generation
+      System.out.printf("Generation #%d, population fitness=%.2f\n",
+              generation, population.getPopulationFitness());
       generation++;
     }
   }

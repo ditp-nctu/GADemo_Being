@@ -89,22 +89,18 @@ public class BeingTest {
    */
   @Test
   public void testDecodeGenes() {
-
     System.out.println("decodeGenes");
+
     Being instance = new Being();
     var size = instance.getSize();
-    var color = instance.getColor();
     var delta = instance.getDelta();
     instance.encodeGenes();
     instance.setSize(0);
-    instance.setColor(-1);
     instance.setDelta(new int[Being.max_ring - 1]);
     assertNotEquals(size, instance.getSize());
-    assertNotEquals(color, instance.getColor());
     assertFalse(Arrays.equals(delta, instance.getDelta()));
     instance.decodeGenes();
     assertEquals(size, instance.getSize());
-    assertEquals(color, instance.getColor());
     assertTrue(Arrays.equals(delta, instance.getDelta()));
   }
 
@@ -127,7 +123,7 @@ public class BeingTest {
   public void testReverseDir() {
     System.out.println("reverseDir");
     Being instance = new Being();
-    instance.reverseDir();
+//    instance.reverseDir();
     // TODO review the generated test code and remove the default call to fail.
     fail("The test case is a prototype.");
   }

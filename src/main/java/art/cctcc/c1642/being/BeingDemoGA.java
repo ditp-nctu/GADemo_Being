@@ -48,33 +48,35 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
     return false;
   }
+  public static boolean debug;
 
   @Override
   public double calcFitness(Being individual) {
 
-    var currentSize = individual.getSize();
     var score_base = 0;
-    for (int i = 0; i < individual.getRing() - 1; i++) {
-      if (i > 0) {
-        var scoreDelta = 0.0;
-        if (i % 2 == 0) {
-          scoreDelta = individual.getDelta()[i - 1];
-        } else {
-          scoreDelta = Math.abs(individual.getDelta()[i - 1] - currentSize * (Math.sqrt(2.0) - 1));
-        }
-        score_base += scoreDelta;
-      }
+    var currentSize = individual.getSize() - individual.getDelta()[0];
+    for (int i = 1; i < individual.getRing() - 1; i++) {
+      score_base += (i % 2 == 0)
+              ? individual.getDelta()[i - 1]
+              : Math.abs(individual.getDelta()[i - 1] - currentSize * (Math.sqrt(2.0) - 1));
       currentSize -= individual.getDelta()[i];
     }
     var deltaScore = individual.getRing() <= 1 ? 0.0 : 1.0 / (score_base / (individual.getRing() - 1) + 1.0);
 //    var sizeScore = individual.getSize() - Being.min_size > 0 ? 1.0 : 0.0;
     var sizeScore = Math.max(0.0, individual.getSize() - Being.min_size) / Being.max_size;
     var ringScore = 1.0 * individual.getRing() / Being.max_ring;
-    var fitness = Math.pow(deltaScore * sizeScore * ringScore, 1.0 / 3);
+//    var fitness = Math.pow(deltaScore + sizeScore + ringScore, 1.0 / 3);
+    var fitness = (Math.sqrt(deltaScore * ringScore * 100) + sizeScore * 100) / 2;
 //    if (individual.getRing() < 5)
 //      System.out.printf("deltaScore=%f, size=%d, sizeScore=%f, ringScore=%f, fitness=%f\n",
 //              deltaScore, individual.getSize(), sizeScore, ringScore, fitness);
     individual.setFitness(fitness);
+    if (debug) {
+      System.out.println("score_base = " + score_base);
+      System.out.println("deltaScore = " + deltaScore);
+      System.out.println("sizeScore = " + sizeScore);
+      System.out.println("ringScore = " + ringScore);
+    }
     return fitness;
   }
   Random r = new Random();
@@ -94,7 +96,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
         var newIndividual = new Being(individual.getX(), individual.getY(),
                 individual.getDx(), individual.getDy(),
                 individual.getColor(), individual.isClockwise());
-        var mutationCites = r.nextInt(5) + 1;
+        var mutationCites = r.nextInt(3) + 1;
         // Loop over individual's genes
         for (int geneIndex = 0; geneIndex < individual.getChromosomeLength(); geneIndex++) {
 
@@ -104,6 +106,8 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
             int newGene = (individual.getGene(geneIndex) == 1) ? 0 : 1;
             // Mutate gene
             newIndividual.setGene(geneIndex, newGene);
+          } else {
+            newIndividual.setGene(geneIndex, individual.getGene(geneIndex));
           }
         }
         newIndividual.decodeGenes();
@@ -111,7 +115,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
           newIndividual.setColor((int) (Math.random() * 256));
           newPopulation.setIndividual(populationIndex, newIndividual);
           mutationCounter++;
-          System.out.printf("Ring=%d, delta=%s\n", newIndividual.getRing(), Arrays.toString(newIndividual.getDelta()));
+          System.out.printf("! Ring=%d, delta=%s\n", newIndividual.getRing(), Arrays.toString(newIndividual.getDelta()));
           continue;
         }
       }
@@ -149,8 +153,9 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
         var crossoverCites = r.nextInt(3) + 1;
         for (var geneIndex = 0; geneIndex < parent1.getChromosomeLength(); geneIndex++) {
           // 3 crossover cites at most with 10% swapping rate
-          if (0.1 > Math.random() && crossoverCites-- > 0)
+          if (0.1 > Math.random() && crossoverCites-- > 0) {
             usingFirst = !usingFirst;
+          }
           offspring.setGene(geneIndex, (usingFirst ? parent1 : parent2).getGene(geneIndex));
         }
         offspring.decodeGenes();
@@ -158,7 +163,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
           // Add offspring to new population
           newPopulation.setIndividual(populationIndex, offspring);
           crossoverCounter++;
-          System.out.printf("Ring=%d, delta=%s\n", offspring.getRing(), Arrays.toString(offspring.getDelta()));
+          System.out.printf("X Ring=%d, delta=%s\n", offspring.getRing(), Arrays.toString(offspring.getDelta()));
           continue;
         }
       }
