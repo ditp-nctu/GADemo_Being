@@ -15,6 +15,7 @@
  */
 package art.cctcc.c1642.being;
 
+import java.util.stream.IntStream;
 import processing.core.PApplet;
 
 /**
@@ -23,28 +24,34 @@ import processing.core.PApplet;
  */
 public class Main extends PApplet {
 
-  int beingNo;
+  int populationSize;
 
   BeingDemoGA ga;
   BeingPopulation population;
   // Keep track of current generation
   int generation = 1;
-  int timer = 0;
-  double sec = 1.5;
+  int timer = 1;
+  int text_size;
 
   @Override
   public void settings() {
+
     fullScreen();
   }
 
   @Override
   public void setup() {
+
     rectMode(CENTER);
     stroke(255);
     noFill();
     frameRate(120);
-    beingNo = 100 * width / 3840;
-    ga = new BeingDemoGA(beingNo, 0.5, 0.95, beingNo / 10, width, height);
+    text_size = 50 * width / 3840;
+    Being.max_ring = 30 * width / 3840;
+    Being.min_size = 64 * width / 3840;
+    Being.max_size = 256 * width / 3840;
+    populationSize = 100 * width / 3840;
+    ga = new BeingDemoGA(populationSize, 0.75, 0.75, populationSize * 60 / 100, width, height);
     // Initialize population
     population = ga.initPopulation();
     // Evaluate population
@@ -56,13 +63,17 @@ public class Main extends PApplet {
 
     population = ga.initPopulation();
     ga.evalPopulation(population);
+    generation = 1;
   }
+
+  float bg = 100;
 
   @Override
   public void draw() {
 
-    background(128);
-    for (var i = 0; i < beingNo; i++) {
+//    background(bg = (bg + 1) % 256);
+    background(bg);
+    for (var i = 0; i < populationSize * 60 / 100; i++) {
       Being b = population.getIndividuals()[i];
       stroke(b.getColor());
       pushMatrix();
@@ -73,32 +84,44 @@ public class Main extends PApplet {
         if (j % 2 == 0) {
           circle(0, 0, size);
         } else {
-          rotate(PI / (float) b.getDelta()[j - 1] * (b.isClockwise() ? 1 : -1));
+          rotate(random(0.99f, 1.01f) * PI / (float) b.getDelta()[j - 1] * (b.isClockwise() ? 1 : -1));
           rect(0, 0, size, size);
         }
         size -= b.getDelta()[j];
       }
       popMatrix();
       b.move();
-      if (b.getX() + b.getSize() / 2 > width || b.getX() - b.getSize() / 2 < 0) {
+      if ((b.getX() + 0.5 * b.getSize()) > width || (b.getX() - 0.5 * b.getSize()) < 0) {
+//        b.setX((b.getX() + width) % width);
         b.reverseDir("x");
-      } else if (b.getY() + b.getSize() / 2 > height || b.getY() - b.getSize() / 2 < 0) {
+      } else if ((b.getY() + 0.5 * b.getSize()) > height || (b.getY() - 0.5 * b.getSize()) < 0) {
+//        b.setY((b.getY() + height) % height);
         b.reverseDir("y");
       }
     }
-    if (timer++ > frameRate * sec) {
-      timer = 0;
-      // Apply crossover
-      population = ga.crossoverPopulation(population);
-      // Apply mutation
-      population = ga.mutatePopulation(population);
-      // Evaluate population
-      ga.evalPopulation(population);
-      // Increment the current generation
-      System.out.printf("Generation #%d, population fitness=%.2f\n",
-              generation, population.getPopulationFitness());
-      generation++;
-    }
+//    if (timer++ > frameRate) {
+    timer = 0;
+    // Increment the current generation
+    System.out.printf("========== generation#%d ==========\n", generation++);
+    // Apply crossover
+    population = ga.crossoverPopulation(population);
+    // Apply mutation
+    population = ga.mutatePopulation(population);
+    System.out.println();
+    // Evaluate population
+    ga.evalPopulation(population);
+    IntStream.range(0, populationSize)
+            .mapToObj(population::getFittest)
+            .map(Being::getInfo)
+            .forEach(System.out::println);
+    System.out.printf(" population fitness=%.2f\n", population.getPopulationFitness());
+//    }
+//    fill(bg > 128 ? 0 : 255);
+    fill(0);
+    textSize(text_size);
+//    text(String.format("%.2f", population.getPopulationFitness()), 10, 50);
+    text(String.valueOf(generation), 10, text_size);
+    noFill();
   }
 
   public static void main(String[] args) {

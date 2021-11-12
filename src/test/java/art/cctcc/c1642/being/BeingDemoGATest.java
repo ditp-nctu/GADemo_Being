@@ -59,22 +59,6 @@ public class BeingDemoGATest {
   }
 
   /**
-   * Test of isTerminationConditionMet method, of class BeingDemoGA.
-   */
-  @Test
-  @Disabled
-  public void testIsTerminationConditionMet() {
-    System.out.println("isTerminationConditionMet");
-    BeingPopulation population = null;
-    BeingDemoGA instance = null;
-    boolean expResult = false;
-    boolean result = instance.isTerminationConditionMet(population);
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
-  }
-
-  /**
    * Test of calcFitness method, of class BeingDemoGA.
    */
   @Test
@@ -87,14 +71,13 @@ public class BeingDemoGATest {
     //{247, 9, 9, 4, 8, 7, 8, 5, 6, 5, 8, 6, 6, 8, 6, 8, 1, 2, 7, 1, 9, 7, 13, 3};
     individual.setDelta(delta);
     assertEquals(delta, individual.getDelta());
-    individual.setSize(226);
+    individual.setSize(Being.min_size / 2 + delta[0] + delta[1]);
     individual.refreshRing();
     assertEquals(ring, individual.getRing());
     BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0, 100, 100);
     BeingDemoGA.debug = true;
     double result = instance.calcFitness(individual);
     System.out.println("result = " + result);
-//    assertEquals(expResult, result, 0.0);
   }
 
   /**

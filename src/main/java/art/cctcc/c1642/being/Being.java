@@ -18,7 +18,7 @@ public class Being extends Individual {
   public static int min_size = 64;
   public static int max_size = 256;
   public static Random r = new Random();
-  public static int chromosomeLength = 8 + 8 * (max_ring - 1);
+  public static int chromosomeLength;
 
   private int size;
   private int x;
@@ -27,36 +27,41 @@ public class Being extends Individual {
   private int dx;
   private int dy;
   private int ring;
-  private int[] delta = new int[max_ring - 1];
+  private int[] delta;
   private boolean clockwise;
   // int size, delta[max_ring]
 
   public Being(int x, int y, int dx, int dy, int color, boolean clockwise) {
 
-    super(new int[chromosomeLength]);
+    super(new int[chromosomeLength = 8 + 8 * (max_ring - 1)]);
     this.x = x;
     this.y = y;
     this.dx = dx;
     this.dy = dy;
     this.color = color;
     this.clockwise = clockwise;
+    this.delta = new int[max_ring - 1];
+  }
+
+  public Being(Being original) {
+
+    this(original.getX(), original.getY(), original.getDx(), original.getDy(),
+            original.getColor(), original.isClockwise());
   }
 
   public Being() {
 
-    super(chromosomeLength);
+    super(chromosomeLength = 8 + 8 * (max_ring - 1));
     this.size = r.nextInt(max_size - min_size) + min_size;
     this.color = r.nextInt(256);
-    float current_size = this.size;
-    this.ring = 0;
+    int current_size = this.size;
+    delta = new int[max_ring - 1];
     for (int j = 0; j < max_ring - 1; j++) {
-      delta[j] = (int) (Math.random() * (current_size / (max_ring - this.ring++))) + 1;
+      delta[j] = r.nextInt(current_size / (max_ring - this.ring++)) + 1;
       current_size -= delta[j];
-      if (current_size <= 0) {
-        break;
-      }
     }
-    this.clockwise = Math.random() > 0.5;
+    this.refreshRing();
+    this.clockwise = r.nextDouble() > 0.5;
 //    System.out.printf("Ring=%d, delta=%s\n", ring, Arrays.toString(delta));
     this.changeDir(0);
   }
@@ -67,7 +72,7 @@ public class Being extends Individual {
     float current_size = this.size;
     for (int i = 0; i < max_ring - 1; i++) {
       current_size -= delta[i];
-      if (current_size <= 0) {
+      if (current_size <= min_size / 2.0) {
         break;
       }
       ring++;
@@ -114,27 +119,37 @@ public class Being extends Individual {
 
   public void move() {
 
-    changeDir(0.99);
+    changeDir(0.95);
     this.x += dx;
     this.y += dy;
   }
 
   private void changeDir(double rate) {
 
-    if (Math.random() > rate) {
+    if (r.nextDouble() > rate) {
       this.dx = (r.nextInt(2) + 1) * (r.nextInt(3) - 1);
       this.dy = (r.nextInt(2) + 1) * (r.nextInt(3) - 1);
-      this.color = r.nextInt(256);
     }
   }
 
   public void reverseDir(String direction) {
 
     switch (direction) {
-      case "x" ->
+      case "x" -> {
         this.dx = -this.dx;
-      case "y" ->
+      }
+      case "y" -> {
         this.dy = -this.dy;
+      }
     }
+    move();
+  }
+
+  public String getInfo() {
+
+    var info = String.format("%6.3f %4d %3d {%s}",
+            this.getFitness() * 100, this.getSize(), this.getRing(),
+            Arrays.stream(delta).mapToObj(String::valueOf).collect(Collectors.joining(", ")));
+    return info;
   }
 }

@@ -39,9 +39,9 @@ public class BeingPopulation extends Population<Being> {
       // length
       var individual = new Being();
       var size = individual.getSize();
-      individual.setX((int) (Math.random() * (width - size * 2) + size));
-      individual.setY((int) (Math.random() * (height - size * 2) + size));
-      individual.setColor((int) (Math.random() * 256));
+      individual.setX(Being.r.nextInt((int) width - size) + size / 2);
+      individual.setY(Being.r.nextInt((int) height - size) + size / 2);
+      individual.setColor(Being.r.nextInt(256));
       individual.encodeGenes();
       // Add individual to population
       this.population[individualCount] = individual;

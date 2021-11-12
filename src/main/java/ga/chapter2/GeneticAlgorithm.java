@@ -4,15 +4,13 @@ package ga.chapter2;
  * The GeneticAlgorithm class is our main abstraction for managing the
  * operations of the genetic algorithm.This class is meant to be
  * problem-specific, meaning that (for instance) the "calcFitness" method may
- * need to change from problem to problem. This class concerns itself mostly
- * with population-level operations, but also problem-specific operations such
- * as calculating fitness, testing for termination criteria, and managing
- * mutation and crossover operations (which generally need to be
- * problem-specific as well).
- *
- * Generally, GeneticAlgorithm might be better suited as an abstract class or an
- * interface, rather than a concrete class as below. A GeneticAlgorithm
- * interface would require implementation of methods such as
+ * need to change from problem to problem.This class concerns itself mostly with
+ * population-level operations, but also problem-specific operations such as
+ * calculating fitness, testing for termination criteria, and managing mutation
+ * and crossover operations (which generally need to be problem-specific as
+ * well). Generally, GeneticAlgorithm might be better suited as an abstract
+ * class or an interface, rather than a concrete class as below. A
+ * GeneticAlgorithm interface would require implementation of methods such as
  * "isTerminationConditionMet", "calcFitness", "mutatePopulation", etc, and a
  * concrete class would be defined to solve a particular problem domain. For
  * instance, the concrete class "TravelingSalesmanGeneticAlgorithm" would
@@ -21,7 +19,8 @@ package ga.chapter2;
  * concrete as possible.
  *
  * @author bkanber
- * @param <I>
+ * @param <P> Population class
+ * @param <I> Individual class
  *
  */
 abstract public class GeneticAlgorithm<P extends Population<I>, I extends Individual> {
@@ -60,7 +59,6 @@ abstract public class GeneticAlgorithm<P extends Population<I>, I extends Indivi
   /**
    * Initialize population
    *
-   * @param chromosomeLength The length of the individuals chromosome
    * @return population The initial population generated
    */
   abstract public P initPopulation();
