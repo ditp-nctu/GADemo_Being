@@ -73,7 +73,7 @@ class Being {
                 this.dy = -this.dy;
                 break;
         }
-        move();
+        this.move();
     }
 
     draw() {
