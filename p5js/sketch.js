@@ -45,7 +45,7 @@ class Being {
         this.c = c;
         let current_size = this.size;
         for (let i = 0; i < max_ring; i++) {
-            this.delta[i] = (random(current_size / (max_ring - i)));
+            this.delta[i] = random(1, current_size / (max_ring - i));
             current_size -= this.delta[i];
         }
         this.changeDir(0);
@@ -59,9 +59,10 @@ class Being {
 
     changeDir(rate) {
         if (random(1) > rate) {
-            this.dx = (random(2) + 1) * (random(3) - 1);
-            this.dy = (random(2) + 1) * (random(3) - 1);
+            this.dx = random(-2, 2);
+            this.dy = random(-2, 2);
         }
+        console.log(this.dx + ', ' + this.dy);
     }
 
     reverseDir(dir) {
