@@ -52,7 +52,7 @@ class Being {
     }
 
     move() {
-        this.changeDir(0.99);
+        this.changeDir(0.95);
         this.x += this.dx;
         this.y += this.dy;
     }
@@ -73,6 +73,7 @@ class Being {
                 this.dy = -this.dy;
                 break;
         }
+        move();
     }
 
     draw() {
