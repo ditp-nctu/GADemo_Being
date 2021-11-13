@@ -56,7 +56,7 @@ public class Being extends Individual {
     int current_size = this.size;
     delta = new int[max_ring - 1];
     for (int j = 0; j < max_ring - 1; j++) {
-      delta[j] = r.nextInt(current_size / (max_ring - this.ring++)) + 1;
+      delta[j] = (int) (r.nextDouble() * current_size / (max_ring - this.ring++)) + 1;
       current_size -= delta[j];
     }
     this.refreshRing();
