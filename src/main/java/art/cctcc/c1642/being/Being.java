@@ -15,7 +15,7 @@ import lombok.Setter;
 public class Being extends Individual {
 
   public static int max_ring = 25;
-  public static int min_size = 64;
+  public static int min_size = 32;
   public static int max_size = 256;
   public static Random r = new Random();
   public static int chromosomeLength;
@@ -29,7 +29,6 @@ public class Being extends Individual {
   private int ring;
   private int[] delta;
   private boolean clockwise;
-  // int size, delta[max_ring]
 
   public Being(int x, int y, int dx, int dy, int color, boolean clockwise) {
 
@@ -62,7 +61,6 @@ public class Being extends Individual {
     }
     this.refreshRing();
     this.clockwise = r.nextDouble() > 0.5;
-//    System.out.printf("Ring=%d, delta=%s\n", ring, Arrays.toString(delta));
     this.changeDir(0);
   }
 
@@ -119,7 +117,7 @@ public class Being extends Individual {
 
   public void move() {
 
-    changeDir(0.95);
+    changeDir(0.98);
     this.x += dx;
     this.y += dy;
   }
@@ -152,4 +150,30 @@ public class Being extends Individual {
             Arrays.stream(delta).mapToObj(String::valueOf).collect(Collectors.joining(", ")));
     return info;
   }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 19 * hash + this.size;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Being other = (Being) obj;
+    if (this.size != other.size) {
+      return false;
+    }
+    return true;
+  }
+
 }

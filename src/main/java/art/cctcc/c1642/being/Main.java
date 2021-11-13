@@ -30,7 +30,7 @@ public class Main extends PApplet {
   BeingPopulation population;
   // Keep track of current generation
   int generation = 1;
-  int timer = 1;
+  int timer;
   int text_size;
 
   @Override
@@ -45,41 +45,68 @@ public class Main extends PApplet {
     rectMode(CENTER);
     stroke(255);
     noFill();
-    frameRate(120);
+    frameRate(60);
     text_size = 50 * width / 3840;
-    Being.max_ring = 30 * width / 3840;
-    Being.min_size = 64 * width / 3840;
-    Being.max_size = 256 * width / 3840;
-    populationSize = 100 * width / 3840;
-    ga = new BeingDemoGA(populationSize, 0.75, 0.75, populationSize * 60 / 100, width, height);
+    Being.max_ring = 40 * width / 3840;
+    populationSize = 200 * (width * height) / (3840 * 2160);
+    ga = new BeingDemoGA(populationSize, 0.75, 0.75, populationSize * 30 / 100, width, height);
     // Initialize population
     population = ga.initPopulation();
     // Evaluate population
     ga.evalPopulation(population);
-  }
+    new Thread(() -> {
+      while (true) {
+        try {
+//      System.out.println(timer + " vs. " + frameRate + " " + ga.isTerminationConditionMet(population));
+          if (timer > frameRate && !ga.isTerminationConditionMet(population)) {
+            timer = 0;
 
-  @Override
-  public void mouseClicked() {
-
-    population = ga.initPopulation();
-    ga.evalPopulation(population);
-    generation = 1;
+            // Increment the current generation
+            System.out.printf("========== generation#%d ==========\n", generation++);
+            // Apply crossover
+            population = ga.crossoverPopulation(population);
+            // Apply mutation
+            population = ga.mutatePopulation(population);
+            System.out.println();
+            // Evaluate population
+            ga.evalPopulation(population);
+            IntStream.range(0, populationSize)
+                    .peek(i -> {
+                      if (i == ga.getElitismCount()) {
+                        System.out.println("-".repeat(80));
+                      }
+                    })
+                    .mapToObj(population::getFittest)
+                    .map(Being::getInfo)
+                    .forEach(System.out::println);
+            System.out.printf(" population fitness=%.2f\n", ga.getElitismFitnessAverage(population));
+          } else {
+            Thread.sleep(100);
+          }
+        } catch (InterruptedException ex) {
+          ex.printStackTrace();
+        }
+      }
+    }).start();
   }
 
   float bg = 100;
+  int inc = 1;
 
   @Override
   public void draw() {
 
-//    background(bg = (bg + 1) % 256);
-    background(bg);
-    for (var i = 0; i < populationSize * 60 / 100; i++) {
-      Being b = population.getIndividuals()[i];
+    timer++;
+    background(bg += inc);
+    if (bg >= 255 || bg <= 0) {
+      inc = -inc;
+    }
+    for (var i = 0; i < ga.getElitismCount(); i++) {
+      Being b = population.getFittest(i);
       stroke(b.getColor());
       pushMatrix();
       translate(b.getX(), b.getY());
       var size = b.getSize();
-
       for (int j = 0; j < b.getRing() - 1; j++) {
         if (j % 2 == 0) {
           circle(0, 0, size);
@@ -92,36 +119,24 @@ public class Main extends PApplet {
       popMatrix();
       b.move();
       if ((b.getX() + 0.5 * b.getSize()) > width || (b.getX() - 0.5 * b.getSize()) < 0) {
-//        b.setX((b.getX() + width) % width);
         b.reverseDir("x");
-      } else if ((b.getY() + 0.5 * b.getSize()) > height || (b.getY() - 0.5 * b.getSize()) < 0) {
-//        b.setY((b.getY() + height) % height);
+      }
+      if ((b.getY() + 0.5 * b.getSize()) > height || (b.getY() - 0.5 * b.getSize()) < 0) {
         b.reverseDir("y");
       }
     }
-//    if (timer++ > frameRate) {
-    timer = 0;
-    // Increment the current generation
-    System.out.printf("========== generation#%d ==========\n", generation++);
-    // Apply crossover
-    population = ga.crossoverPopulation(population);
-    // Apply mutation
-    population = ga.mutatePopulation(population);
-    System.out.println();
-    // Evaluate population
-    ga.evalPopulation(population);
-    IntStream.range(0, populationSize)
-            .mapToObj(population::getFittest)
-            .map(Being::getInfo)
-            .forEach(System.out::println);
-    System.out.printf(" population fitness=%.2f\n", population.getPopulationFitness());
-//    }
-//    fill(bg > 128 ? 0 : 255);
-    fill(0);
+    fill(bg > 128 ? 0 : 255);
     textSize(text_size);
-//    text(String.format("%.2f", population.getPopulationFitness()), 10, 50);
     text(String.valueOf(generation), 10, text_size);
     noFill();
+  }
+
+  @Override
+  public void mouseClicked() {
+
+    population = ga.initPopulation();
+    ga.evalPopulation(population);
+    generation = 1;
   }
 
   public static void main(String[] args) {

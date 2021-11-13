@@ -16,20 +16,25 @@
 package art.cctcc.c1642.being;
 
 import ga.chapter2.GeneticAlgorithm;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import lombok.Getter;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
+@Getter
 public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
   private float width;
   private float height;
 
-  public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate, int elitismCount,
-          float width, float height) {
+  public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
+          int elitismCount, float width, float height) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
     this.width = width;
@@ -48,6 +53,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
     return false;
   }
+
   public static boolean debug;
 
   @Override
@@ -61,21 +67,17 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
               : Math.abs(being.getDelta()[i - 1] - currentSize * (Math.sqrt(2.0) - 1));
       currentSize -= being.getDelta()[i];
     }
-    var deltaScore = being.getRing() <= 2 ? 0.0 : 1.0 / (deltaScoreBase / (being.getRing() - 1) + 1.0);
-//    var sizeScore = individual.getSize() - Being.min_size > 0 ? 1.0 : 0.0;
-//    var sizeScore = Math.abs(being.getSize() - (Being.min_size + Being.max_size) / 2.0) / Being.max_size;
+    var deltaScore = (being.getRing() == 1) ? 0.0
+            : (1.0 / (deltaScoreBase / (being.getRing() - 1) + 1.0));
     var ringScore = 1.0 * being.getRing() / Being.max_ring;
-//    var fitness = Math.pow(deltaScore + sizeScore + ringScore, 1.0 / 3);
-//    var fitness = (deltaScore * 1.0 + ringScore * 2.5 + sizeScore * 1.0) / 5.0;
-    var fitness = (deltaScore * 1.0 + ringScore * 2.5) / 3.5;
+    var fitness = (deltaScore * 1.0
+            + ringScore * 1.5) / 2.5;
     being.setFitness(fitness);
-    if (debug)
-//      System.out.printf("ring=%d, deltaScore=%.2f, ringScore=%.2f, sizeScore=%.2f\n",
-//              being.getRing(),
-//              deltaScore, ringScore, sizeScore);
+    if (debug) {
       System.out.printf("ring=%d, deltaScore=%.2f, ringScore=%.2f\n",
               being.getRing(),
               deltaScore, ringScore);
+    }
     return fitness;
   }
 
@@ -89,12 +91,11 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     // Loop over current population by fitness
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var parent1 = population.getFittest(populationIndex);
-//      System.out.printf("(%.2f)", parent1.getFitness());
       // Apply crossover to this individual?
-      if (this.crossoverRate < Being.r.nextDouble() || populationIndex < this.elitismCount)
+      if (this.crossoverRate < Being.r.nextDouble() || populationIndex < this.elitismCount) {
         // Add individual to new population without applying crossover
         newPopulation.setIndividual(populationIndex, parent1);
-      else {
+      } else {
         // Initialize offspring
         var offspring = new Being(parent1);
 
@@ -102,7 +103,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
         var parent2 = selectParent(population);
 
         // Loop over genome
-        var crossover = Being.r.nextInt(Being.chromosomeLength / 20) + 1;
+        var crossover = Being.r.nextInt(Being.chromosomeLength / 8) + 1;
         var crossoverCites = Stream.generate(() -> Being.r.nextInt(parent1.getChromosomeLength()))
                 .distinct()
                 .limit(crossover)
@@ -116,11 +117,15 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
           offspring.setGene(geneIndex, (usingFirst ? parent1 : parent2).getGene(geneIndex));
         }
         offspring.decodeGenes();
-        calcFitness(offspring);
         // Add offspring to new population
-        newPopulation.setIndividual(populationIndex, offspring);
-        crossoverCounter++;
-        System.out.printf("X Ring=%d, delta=%s\n", offspring.getRing(), Arrays.toString(offspring.getDelta()));
+        if (population.contains(offspring)) {
+          newPopulation.setIndividual(populationIndex, parent1);
+        } else {
+          newPopulation.setIndividual(populationIndex, offspring);
+          crossoverCounter++;
+          calcFitness(offspring);
+          System.out.printf("X %s\n", offspring.getInfo());
+        }
       }
     }
     System.out.print(" crossoverCounter=" + crossoverCounter);
@@ -138,11 +143,11 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var being = population.getFittest(populationIndex);
       // Skip mutation if this is an elite individual
-      if (this.mutationRate < Being.r.nextDouble() || populationIndex < this.elitismCount)
+      if (this.mutationRate < Being.r.nextDouble() || populationIndex < this.elitismCount) {
         newPopulation.setIndividual(populationIndex, being);
-      else {
+      } else {
         var newBeing = new Being(being);
-        var mutation = Being.r.nextInt(Being.chromosomeLength / 20) + 1;
+        var mutation = Being.r.nextInt(Being.chromosomeLength / 8) + 1;
         var mutationCites = Stream.generate(() -> Being.r.nextInt(being.getChromosomeLength()))
                 .distinct()
                 .limit(mutation)
@@ -160,18 +165,28 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
           }
         }
         newBeing.decodeGenes();
-        newBeing.setColor(Being.r.nextInt(256));
-        newPopulation.setIndividual(populationIndex, newBeing);
-        mutationCounter++;
-        System.out.printf("\n! Ring=%d, delta=%s", newBeing.getRing(), Arrays.toString(newBeing.getDelta()));
+        if (population.contains(newBeing)) {
+          newPopulation.setIndividual(populationIndex, being);
+        } else {
+          newBeing.setColor(Being.r.nextInt(256));
+          newPopulation.setIndividual(populationIndex, newBeing);
+          mutationCounter++;
+          calcFitness(newBeing);
+          System.out.printf("\n! %s", newBeing.getInfo());
+        }
       }
-
     }
-    if (mutationCounter > 0) System.out.println();
+    System.out.print((mutationCounter > 0) ? "\n" : "");
     System.out.print(" mutationCounter=" + mutationCounter);
     // Return mutated population
     return newPopulation;
-
   }
 
+  public double getElitismFitnessAverage(BeingPopulation population) {
+
+    return IntStream.range(0, elitismCount)
+            .mapToObj(population::getFittest)
+            .mapToDouble(b -> b.getFitness() * 100)
+            .average().getAsDouble();
+  }
 }

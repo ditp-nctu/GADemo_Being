@@ -16,6 +16,9 @@
 package art.cctcc.c1642.being;
 
 import ga.chapter2.Population;
+import java.util.Arrays;
+import static java.util.function.Predicate.not;
+import java.util.stream.Stream;
 import lombok.Getter;
 
 /**
@@ -37,7 +40,10 @@ public class BeingPopulation extends Population<Being> {
     for (int individualCount = 0; individualCount < populationSize; individualCount++) {
       // Create an individual, initializing its chromosome to the given
       // length
-      var individual = new Being();
+      var individual = Stream.generate(Being::new)
+              .filter(not(this::contains))
+              .findAny()
+              .get();
       var size = individual.getSize();
       individual.setX(Being.r.nextInt((int) width - size) + size / 2);
       individual.setY(Being.r.nextInt((int) height - size) + size / 2);
@@ -48,10 +54,14 @@ public class BeingPopulation extends Population<Being> {
     }
   }
 
+  public boolean contains(Being being) {
+    
+    return (Arrays.asList(this.population).contains(being));
+  }
+
   @Override
   public Being[] getIndividuals() {
 
     return this.population;
   }
-
 }

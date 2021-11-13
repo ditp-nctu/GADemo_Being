@@ -1,5 +1,7 @@
 package ga.chapter2;
 
+import lombok.Getter;
+
 /**
  * The GeneticAlgorithm class is our main abstraction for managing the
  * operations of the genetic algorithm.This class is meant to be
@@ -23,6 +25,7 @@ package ga.chapter2;
  * @param <I> Individual class
  *
  */
+@Getter
 abstract public class GeneticAlgorithm<P extends Population<I>, I extends Individual> {
 
   protected int populationSize;

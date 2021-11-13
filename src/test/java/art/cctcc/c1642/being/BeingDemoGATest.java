@@ -112,4 +112,14 @@ public class BeingDemoGATest {
     fail("The test case is a prototype.");
   }
 
+  @Test
+  @Disabled
+  public void testSize() {
+    System.out.println("size");
+    for (int i = Being.min_size; i < Being.max_size; i++) {
+      var sizeScore = (Math.cos(i / 3.14) + 1) / 2;
+      System.out.printf("i = %3d", i);
+      System.out.println(", sizeScore = " + "*".repeat((int) (sizeScore * 10)));
+    }
+  }
 }
