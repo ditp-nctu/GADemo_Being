@@ -62,7 +62,7 @@ class Being {
             this.dx = random(-2, 2);
             this.dy = random(-2, 2);
         }
-        console.log(this.dx + ', ' + this.dy);
+        //console.log(this.dx + ', ' + this.dy);
     }
 
     reverseDir(dir) {
