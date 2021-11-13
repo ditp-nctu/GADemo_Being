@@ -15,6 +15,7 @@
  */
 package art.cctcc.c1642.being;
 
+import java.util.Comparator;
 import java.util.stream.IntStream;
 import processing.core.PApplet;
 
@@ -28,10 +29,10 @@ public class Main extends PApplet {
 
   BeingDemoGA ga;
   BeingPopulation population;
-  // Keep track of current generation
   int generation = 1;
-  int timer;
   int text_size;
+  float bg = 100;
+  int inc = 1;
 
   @Override
   public void settings() {
@@ -43,75 +44,49 @@ public class Main extends PApplet {
   public void setup() {
 
     rectMode(CENTER);
-    stroke(255);
-    noFill();
-    frameRate(60);
+    strokeWeight(1);
     text_size = 50 * width / 3840;
     Being.max_ring = 40 * width / 3840;
     populationSize = 200 * (width * height) / (3840 * 2160);
-    ga = new BeingDemoGA(populationSize, 0.75, 0.75, populationSize * 30 / 100, width, height);
-    // Initialize population
-    population = ga.initPopulation();
-    // Evaluate population
-    ga.evalPopulation(population);
-    new Thread(() -> {
-      while (true) {
-        try {
-//      System.out.println(timer + " vs. " + frameRate + " " + ga.isTerminationConditionMet(population));
-          if (timer > frameRate && !ga.isTerminationConditionMet(population)) {
-            timer = 0;
+    ga = new BeingDemoGA(populationSize, 0.95, 0.95, populationSize * 30 / 100, width, height);
+    ga.evalPopulation(population = ga.initPopulation());
 
-            // Increment the current generation
-            System.out.printf("========== generation#%d ==========\n", generation++);
-            // Apply crossover
-            population = ga.crossoverPopulation(population);
-            // Apply mutation
-            population = ga.mutatePopulation(population);
-            System.out.println();
-            // Evaluate population
-            ga.evalPopulation(population);
-            IntStream.range(0, populationSize)
-                    .peek(i -> {
-                      if (i == ga.getElitismCount()) {
-                        System.out.println("-".repeat(80));
-                      }
-                    })
-                    .mapToObj(population::getFittest)
-                    .map(Being::getInfo)
-                    .forEach(System.out::println);
-            System.out.printf(" population fitness=%.2f\n", ga.getElitismFitnessAverage(population));
-          } else {
-            Thread.sleep(100);
-          }
-        } catch (InterruptedException ex) {
-          ex.printStackTrace();
-        }
+    new Thread(() -> {
+      while (!ga.isTerminationConditionMet(population)) {
+        System.out.printf("========== generation#%d ==========\n", generation++);
+        population = ga.crossoverPopulation(population);
+        population = ga.mutatePopulation(population);
+        System.out.println();
+        ga.evalPopulation(population);
+        IntStream.range(0, ga.getElitismCount())
+                .mapToObj(population::getFittest)
+                .sorted(Comparator.comparing(Being::getSize))
+                .map(Being::getInfo)
+                .forEach(System.out::println);
+        System.out.printf(" Elitism fitness average=%.2f (population: %d/%d)\n",
+                ga.getElitismFitnessAverage(population),
+                ga.getElitismCount(), ga.getPopulationSize());
       }
     }).start();
   }
 
-  float bg = 100;
-  int inc = 1;
-
   @Override
   public void draw() {
 
-    timer++;
     background(bg += inc);
-    if (bg >= 255 || bg <= 0) {
-      inc = -inc;
-    }
+    if (bg >= 255 || bg <= 0) inc = -inc;
+    noFill();
     for (var i = 0; i < ga.getElitismCount(); i++) {
       Being b = population.getFittest(i);
       stroke(b.getColor());
       pushMatrix();
       translate(b.getX(), b.getY());
       var size = b.getSize();
-      for (int j = 0; j < b.getRing() - 1; j++) {
+      for (int j = 0; j < b.getRing(); j++) {
         if (j % 2 == 0) {
           circle(0, 0, size);
         } else {
-          rotate(random(0.99f, 1.01f) * PI / (float) b.getDelta()[j - 1] * (b.isClockwise() ? 1 : -1));
+          rotate(random(0.99f, 1.01f) * PI / (1.0f + b.getDelta()[j - 1]) * (b.isClockwise() ? 1 : -1));
           rect(0, 0, size, size);
         }
         size -= b.getDelta()[j];
@@ -127,8 +102,7 @@ public class Main extends PApplet {
     }
     fill(bg > 128 ? 0 : 255);
     textSize(text_size);
-    text(String.valueOf(generation), 10, text_size);
-    noFill();
+    text(String.format("g=%d, avg=%.2f", generation, ga.getElitismFitnessAverage(population)), 10, text_size);
   }
 
   @Override

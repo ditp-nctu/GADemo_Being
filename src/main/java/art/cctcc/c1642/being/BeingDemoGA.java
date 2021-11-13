@@ -16,9 +16,7 @@
 package art.cctcc.c1642.being;
 
 import ga.chapter2.GeneticAlgorithm;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -51,7 +49,9 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
   @Override
   public boolean isTerminationConditionMet(BeingPopulation population) {
 
-    return false;
+    return !IntStream.range(0, elitismCount)
+            .map(i -> population.getFittest(i).getRing())
+            .anyMatch(ring -> ring <= Being.min_ring);
   }
 
   public static boolean debug;
@@ -71,7 +71,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
             : (1.0 / (deltaScoreBase / (being.getRing() - 1) + 1.0));
     var ringScore = 1.0 * being.getRing() / Being.max_ring;
     var fitness = (deltaScore * 1.0
-            + ringScore * 1.5) / 2.5;
+            + ringScore * 9.0) / 10;
     being.setFitness(fitness);
     if (debug) {
       System.out.printf("ring=%d, deltaScore=%.2f, ringScore=%.2f\n",
@@ -92,7 +92,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var parent1 = population.getFittest(populationIndex);
       // Apply crossover to this individual?
-      if (this.crossoverRate < Being.r.nextDouble() || populationIndex < this.elitismCount) {
+      if (populationIndex < this.elitismCount || this.crossoverRate < Being.r.nextDouble()) {
         // Add individual to new population without applying crossover
         newPopulation.setIndividual(populationIndex, parent1);
       } else {
@@ -103,7 +103,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
         var parent2 = selectParent(population);
 
         // Loop over genome
-        var crossover = Being.r.nextInt(Being.chromosomeLength / 8) + 1;
+        var crossover = Being.r.nextInt(Being.chromosomeLength / 20) + 1;
         var crossoverCites = Stream.generate(() -> Being.r.nextInt(parent1.getChromosomeLength()))
                 .distinct()
                 .limit(crossover)
@@ -118,7 +118,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
         }
         offspring.decodeGenes();
         // Add offspring to new population
-        if (population.contains(offspring)) {
+        if (population.containsSameSize(offspring)) {
           newPopulation.setIndividual(populationIndex, parent1);
         } else {
           newPopulation.setIndividual(populationIndex, offspring);
@@ -143,11 +143,11 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var being = population.getFittest(populationIndex);
       // Skip mutation if this is an elite individual
-      if (this.mutationRate < Being.r.nextDouble() || populationIndex < this.elitismCount) {
+      if (populationIndex < this.elitismCount || this.mutationRate < Being.r.nextDouble()) {
         newPopulation.setIndividual(populationIndex, being);
       } else {
         var newBeing = new Being(being);
-        var mutation = Being.r.nextInt(Being.chromosomeLength / 8) + 1;
+        var mutation = Being.r.nextInt(Being.chromosomeLength / 10) + 1;
         var mutationCites = Stream.generate(() -> Being.r.nextInt(being.getChromosomeLength()))
                 .distinct()
                 .limit(mutation)
@@ -165,7 +165,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
           }
         }
         newBeing.decodeGenes();
-        if (population.contains(newBeing)) {
+        if (population.containsSameSize(newBeing)) {
           newPopulation.setIndividual(populationIndex, being);
         } else {
           newBeing.setColor(Being.r.nextInt(256));

@@ -21,7 +21,7 @@ var max_ring = 20;
 function setup() {
     createCanvas(windowWidth, windowHeight);
     rectMode(CENTER);
-    stroke(255);
+    strokeWeight(1);
     noFill();
     for (let i = 0; i < beingNo; i++) {
         var size = random(64, 127);

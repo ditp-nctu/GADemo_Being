@@ -15,6 +15,7 @@ import lombok.Setter;
 public class Being extends Individual {
 
   public static int max_ring = 25;
+  public static int min_ring = 10;
   public static int min_size = 32;
   public static int max_size = 256;
   public static Random r = new Random();
@@ -53,11 +54,9 @@ public class Being extends Individual {
     super(chromosomeLength = 8 + 8 * (max_ring - 1));
     this.size = r.nextInt(max_size - min_size) + min_size;
     this.color = r.nextInt(256);
-    int current_size = this.size;
     delta = new int[max_ring - 1];
     for (int j = 0; j < max_ring - 1; j++) {
-      delta[j] = (int) (r.nextDouble() * current_size / (max_ring - this.ring++)) + 1;
-      current_size -= delta[j];
+      delta[j] = j == 0 ? (int) (this.size * (1.0 - Math.sqrt(0.5))) : (j % 2 == 0 ? r.nextInt(5) : 0);
     }
     this.refreshRing();
     this.clockwise = r.nextDouble() > 0.5;
@@ -70,7 +69,7 @@ public class Being extends Individual {
     float current_size = this.size;
     for (int i = 0; i < max_ring - 1; i++) {
       current_size -= delta[i];
-      if (current_size <= min_size / 2.0) {
+      if (current_size <= min_size / 2.0 || i % 2 == 1 && delta[i] == 0) {
         break;
       }
       ring++;
@@ -150,30 +149,4 @@ public class Being extends Individual {
             Arrays.stream(delta).mapToObj(String::valueOf).collect(Collectors.joining(", ")));
     return info;
   }
-
-  @Override
-  public int hashCode() {
-    int hash = 7;
-    hash = 19 * hash + this.size;
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final Being other = (Being) obj;
-    if (this.size != other.size) {
-      return false;
-    }
-    return true;
-  }
-
 }

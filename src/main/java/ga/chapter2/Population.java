@@ -1,13 +1,14 @@
 package ga.chapter2;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
 
 /**
  * A population is an abstraction of a collection of individuals.The population
- class is generally used to perform group-level operations on its individuals,
- such as finding the strongest individuals, collecting stats on the population
- as a whole, and selecting individuals to mutate or crossover.
+ * class is generally used to perform group-level operations on its individuals,
+ * such as finding the strongest individuals, collecting stats on the population
+ * as a whole, and selecting individuals to mutate or crossover.
  *
  * @author bkanber
  * @param <I>
@@ -40,17 +41,9 @@ abstract public class Population<I extends Individual> {
    * is the strongest, population.length - 1 is the weakest.
    * @return individual I at offset
    */
-  public I getFittest(int offset) {
+  synchronized public I getFittest(int offset) {
     // Order population by fitness
-    Arrays.sort(this.population, (var o1, var o2) -> {
-      if (o1.getFitness() > o2.getFitness()) {
-        return -1;
-      } else if (o1.getFitness() < o2.getFitness()) {
-        return 1;
-      }
-      return 0;
-    });
-
+    Arrays.sort(this.population, Comparator.comparing(Individual::getFitness, Comparator.reverseOrder()));
     // Return the fittest individual
     return this.population[offset];
   }

@@ -17,15 +17,14 @@ package art.cctcc.c1642.being;
 
 import ga.chapter2.Population;
 import java.util.Arrays;
+import java.util.Objects;
 import static java.util.function.Predicate.not;
 import java.util.stream.Stream;
-import lombok.Getter;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-@Getter
 public class BeingPopulation extends Population<Being> {
 
   public BeingPopulation(int populationSize) {
@@ -38,10 +37,9 @@ public class BeingPopulation extends Population<Being> {
     this(populationSize);
 
     for (int individualCount = 0; individualCount < populationSize; individualCount++) {
-      // Create an individual, initializing its chromosome to the given
-      // length
+      // Create an individual with unique size and initialize it
       var individual = Stream.generate(Being::new)
-              .filter(not(this::contains))
+              .filter(not(this::containsSameSize))
               .findAny()
               .get();
       var size = individual.getSize();
@@ -54,14 +52,11 @@ public class BeingPopulation extends Population<Being> {
     }
   }
 
-  public boolean contains(Being being) {
-    
-    return (Arrays.asList(this.population).contains(being));
-  }
+  public boolean containsSameSize(Being being) {
 
-  @Override
-  public Being[] getIndividuals() {
-
-    return this.population;
+    return Arrays.stream(this.population)
+            .filter(Objects::nonNull)
+            .map(Being::getSize)
+            .anyMatch(size -> size == being.getSize());
   }
 }
