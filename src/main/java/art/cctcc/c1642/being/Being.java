@@ -1,25 +1,17 @@
 package art.cctcc.c1642.being;
 
+import static art.cctcc.c1642.being.Constants.*;
 import art.cctcc.c1642.being.ex.UnexpectedGeneticCode;
 import ga.chapter2.Individual;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 public class Being extends Individual {
-
-  public static int max_ring = 25;
-  public static int min_ring = 10;
-  public static int min_size = 32;
-  public static int max_size = 256;
-  public static Random r = new Random();
-  public static int chromosomeLength;
 
   private int size;
   private int x;
@@ -33,7 +25,7 @@ public class Being extends Individual {
 
   public Being(int x, int y, int dx, int dy, int color, boolean clockwise) {
 
-    super(new int[chromosomeLength = 8 + 8 * (max_ring - 1)]);
+    super(new int[chromosomeLength]);
     this.x = x;
     this.y = y;
     this.dx = dx;

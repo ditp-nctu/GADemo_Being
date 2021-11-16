@@ -1,5 +1,8 @@
 package ga.chapter2;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * An "Individual" represents a single candidate solution. The core piece of
  * information about an individual is its "chromosome", which is an encoding of
@@ -20,7 +23,10 @@ package ga.chapter2;
  */
 public class Individual {
 
+  @Getter
   private int[] chromosome;
+
+  @Getter @Setter
   private double fitness = -1;
 
   /**
@@ -47,15 +53,6 @@ public class Individual {
   public Individual(int chromosomeLength) {
 
     this(new int[chromosomeLength]);
-  }
-
-  /**
-   * Gets individual's chromosome
-   *
-   * @return The individual's chromosome
-   */
-  public int[] getChromosome() {
-    return this.chromosome;
   }
 
   /**
@@ -88,28 +85,11 @@ public class Individual {
   }
 
   /**
-   * Store individual's fitness
-   *
-   * @param fitness The individuals fitness
-   */
-  public void setFitness(double fitness) {
-    this.fitness = fitness;
-  }
-
-  /**
-   * Gets individual's fitness
-   *
-   * @return The individual's fitness
-   */
-  public double getFitness() {
-    return this.fitness;
-  }
-
-  /**
    * Display the chromosome as a string.
    *
    * @return string representation of the chromosome
    */
+  @Override
   public String toString() {
     String output = "";
     for (int gene = 0; gene < this.chromosome.length; gene++) {

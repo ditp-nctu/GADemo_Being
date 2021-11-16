@@ -1,8 +1,8 @@
 package ga.chapter2;
 
+import static art.cctcc.c1642.being.Constants.*;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Random;
 
 /**
  * A population is an abstraction of a collection of individuals.The population
@@ -101,9 +101,8 @@ abstract public class Population<I extends Individual> {
    *
    */
   public void shuffle() {
-    Random rnd = new Random();
     for (int i = population.length - 1; i > 0; i--) {
-      int index = rnd.nextInt(i + 1);
+      int index = r.nextInt(i + 1);
       I a = population[index];
       population[index] = population[i];
       population[i] = a;

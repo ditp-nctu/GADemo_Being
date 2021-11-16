@@ -15,6 +15,7 @@
  */
 package art.cctcc.c1642.being;
 
+import static art.cctcc.c1642.being.Constants.*;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 import processing.core.PApplet;
@@ -24,8 +25,6 @@ import processing.core.PApplet;
  * @author Jonathan Chang, Chun-yien <ccy@cctcc.art>
  */
 public class Main extends PApplet {
-
-  int populationSize;
 
   BeingDemoGA ga;
   BeingPopulation population;
@@ -45,11 +44,13 @@ public class Main extends PApplet {
 
     rectMode(CENTER);
     strokeWeight(1);
+    Constants.screenWidth = width;
+    Constants.screenHeight = height;
     text_size = 50 * width / 3840;
-    Being.max_ring = 40 * width / 3840;
-    populationSize = 200 * (width * height) / (3840 * 2160);
-    ga = new BeingDemoGA(populationSize, 0.95, 0.95, populationSize * 30 / 100, width, height);
-    ga.evalPopulation(population = ga.initPopulation());
+    max_ring = 40 * width / 3840;
+    ga = new BeingDemoGA(populationSize, 0.95, 0.95, populationSize * 30 / 100);
+    population = ga.initPopulation();
+    ga.evalPopulation(population);
 
     new Thread(() -> {
       while (!ga.isTerminationConditionMet(population)) {
@@ -102,7 +103,9 @@ public class Main extends PApplet {
     }
     fill(bg > 128 ? 0 : 255);
     textSize(text_size);
-    text(String.format("g=%d, avg=%.2f", generation, ga.getElitismFitnessAverage(population)), 10, text_size);
+    text(String.format("g=%d, t=%d/%d, a=%.2f",
+            generation, ga.getQualifiedCount(population), ga.getElitismCount(), ga.getElitismFitnessAverage(population)),
+            10, text_size);
   }
 
   @Override
@@ -114,6 +117,7 @@ public class Main extends PApplet {
   }
 
   public static void main(String[] args) {
+
     System.setProperty("sun.java2d.uiScale", "1.0");
     PApplet.main(Main.class);
   }

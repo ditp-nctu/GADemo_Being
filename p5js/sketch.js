@@ -32,72 +32,31 @@ function setup() {
 function draw() {
     background(128);
     for (let i = 0; i < beingNo; i++) {
-        beings[i].draw();
+        drawBeing(beings[i]);
     }
 }
 
-class Being {
-    constructor(size, x, y, c) {
-        this.delta = [];
-        this.size = size;
-        this.x = x;
-        this.y = y;
-        this.c = c;
-        let current_size = this.size;
-        for (let i = 0; i < max_ring; i++) {
-            this.delta[i] = random(1, current_size / (max_ring - i));
-            current_size -= this.delta[i];
-        }
-        this.changeDir(0);
-    }
 
-    move() {
-        this.changeDir(0.95);
-        this.x += this.dx;
-        this.y += this.dy;
-    }
-
-    changeDir(rate) {
-        if (random(1) > rate) {
-            this.dx = random(-2, 2);
-            this.dy = random(-2, 2);
+function drawBeing(being) {
+    stroke(being.c);
+    push();
+    translate(being.x, being.y);
+    let size = being.size;
+    for (let i = 0; i < max_ring; i++) {
+        if (i % 2 == 0) {
+            circle(0, 0, size);
+        } else {
+            rotate(PI / being.delta[i - 1]);
+            rect(0, 0, size, size);
         }
-        //console.log(this.dx + ', ' + this.dy);
+        size -= being.delta[i];
+        if (size < 0)
+            break;
     }
-
-    reverseDir(dir) {
-        switch (dir) {
-            case "x":
-                this.dx = -this.dx;
-                break;
-            case "y":
-                this.dy = -this.dy;
-                break;
-        }
-        this.move();
-    }
-
-    draw() {
-        stroke(this.c);
-        push();
-        translate(this.x, this.y);
-        let size = this.size;
-        for (let i = 0; i < max_ring; i++) {
-            if (i % 2 == 0) {
-                circle(0, 0, size);
-            } else {
-                rotate(PI / this.delta[i - 1]);
-                rect(0, 0, size, size);
-            }
-            size -= this.delta[i];
-            if (size < 0)
-                break;
-        }
-        pop();
-        this.move();
-        if (this.x + this.size / 2 > width || this.x - this.size / 2 < 0)
-            this.reverseDir("x");
-        if (this.y + this.size / 2 > height || this.y - this.size / 2 < 0)
-            this.reverseDir("y");
-    }
+    pop();
+    being.move();
+    if (being.x + being.size / 2 > width || being.x - being.size / 2 < 0)
+        being.reverseDir("x");
+    if (being.y + being.size / 2 > height || being.y - being.size / 2 < 0)
+        being.reverseDir("y");
 }

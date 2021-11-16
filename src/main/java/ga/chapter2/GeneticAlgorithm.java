@@ -1,5 +1,6 @@
 package ga.chapter2;
 
+import static art.cctcc.c1642.being.Constants.r;
 import lombok.Getter;
 
 /**
@@ -126,7 +127,7 @@ abstract public class GeneticAlgorithm<P extends Population<I>, I extends Indivi
 
     // Spin roulette wheel
     double populationFitness = population.getPopulationFitness();
-    double rouletteWheelPosition = Math.random() * populationFitness;
+    double rouletteWheelPosition = r.nextDouble() * populationFitness;
 
     // Find parent
     double spinWheel = 0;

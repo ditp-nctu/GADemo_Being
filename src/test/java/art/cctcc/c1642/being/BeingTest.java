@@ -15,6 +15,7 @@
  */
 package art.cctcc.c1642.being;
 
+import static art.cctcc.c1642.being.Constants.*;
 import java.util.Arrays;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,7 +110,7 @@ public class BeingTest {
     var delta = instance.getDelta();
     instance.encodeGenes();
     instance.setSize(size + 1);
-    instance.setDelta(new int[Being.max_ring - 1]);
+    instance.setDelta(new int[max_ring - 1]);
     assertNotEquals(size, instance.getSize());
     assertFalse(Arrays.equals(delta, instance.getDelta()));
     instance.decodeGenes();

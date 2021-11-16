@@ -15,6 +15,7 @@
  */
 package art.cctcc.c1642.being;
 
+import static art.cctcc.c1642.being.Constants.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,11 +72,10 @@ public class BeingDemoGATest {
     //{247, 9, 9, 4, 8, 7, 8, 5, 6, 5, 8, 6, 6, 8, 6, 8, 1, 2, 7, 1, 9, 7, 13, 3};
     individual.setDelta(delta);
     assertEquals(delta, individual.getDelta());
-    individual.setSize(Being.min_size / 2 + delta[0] + delta[1]);
+    individual.setSize(min_size / 2 + delta[0] + delta[1]);
     individual.refreshRing();
     assertEquals(ring, individual.getRing());
-    BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0, 100, 100);
-    BeingDemoGA.debug = true;
+    BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0);
     double result = instance.calcFitness(individual);
     System.out.println("result = " + result);
   }
@@ -116,7 +116,7 @@ public class BeingDemoGATest {
   @Disabled
   public void testSize() {
     System.out.println("size");
-    for (int i = Being.min_size; i < Being.max_size; i++) {
+    for (int i = min_size; i < max_size; i++) {
       var sizeScore = (Math.cos(i / 3.14) + 1) / 2;
       System.out.printf("i = %3d", i);
       System.out.println(", sizeScore = " + "*".repeat((int) (sizeScore * 10)));

@@ -15,32 +15,23 @@
  */
 package art.cctcc.c1642.being;
 
-import ga.chapter2.Population;
-import java.util.Objects;
-import java.util.stream.IntStream;
+import java.util.Random;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class BeingPopulation extends Population<Being> {
+public class Constants {
 
-  public BeingPopulation(int populationSize) {
+  public static Random r = new Random();
 
-    this.population = new Being[populationSize];
-  }
+  public static float screenWidth = 3840;
+  public static float screenHeight = 2160;
 
-  public boolean containsSameSize(Being being) {
-
-    return containsSameSize(being, this.population.length);
-  }
-
-  public boolean containsSameSize(Being being, int elitismCount) {
-
-    return IntStream.range(0, elitismCount)
-            .mapToObj(this::getFittest)
-            .filter(Objects::nonNull)
-            .map(Being::getSize)
-            .anyMatch(size -> size == being.getSize());
-  }
+  public static int populationSize = 200;
+  public static int max_ring = 25;
+  public static int min_ring = 10;
+  public static int min_size = 32;
+  public static int max_size = 256;
+  public static int chromosomeLength = 8 + 8 * (max_ring - 1);
 }
