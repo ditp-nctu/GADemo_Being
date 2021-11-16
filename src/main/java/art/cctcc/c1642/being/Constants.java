@@ -25,10 +25,14 @@ public class Constants {
 
   public static Random r = new Random();
 
-  public static float screenWidth = 3840;
-  public static float screenHeight = 2160;
+  public static final float UHDScreenWidth = 3840;
+  public static final float UHDScreenHeight = 2160;
+  public static final float BrowserScreenWidth = 1024;
+  public static final float BrowserScreenHeight = 768;
 
-  public static int populationSize = 200;
+  public static final int DefaultPopulationSize = 200;
+  public static final double DefaultMutationRate = 0.95;
+  public static final double DefaultCrossoverRate = 0.95;
   public static int max_ring = 25;
   public static int min_ring = 10;
   public static int min_size = 32;

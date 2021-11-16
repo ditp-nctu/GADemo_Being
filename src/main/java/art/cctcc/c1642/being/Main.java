@@ -29,7 +29,7 @@ public class Main extends PApplet {
   BeingDemoGA ga;
   BeingPopulation population;
   int generation = 1;
-  int text_size;
+  float text_size;
   float bg = 100;
   int inc = 1;
 
@@ -44,11 +44,12 @@ public class Main extends PApplet {
 
     rectMode(CENTER);
     strokeWeight(1);
-    Constants.screenWidth = width;
-    Constants.screenHeight = height;
     text_size = 50 * width / 3840;
     max_ring = 40 * width / 3840;
-    ga = new BeingDemoGA(populationSize, 0.95, 0.95, populationSize * 30 / 100);
+    int elitismCount = DefaultPopulationSize * 30 / 100;
+    ga = new BeingDemoGA(DefaultPopulationSize,
+            DefaultMutationRate, DefaultCrossoverRate,
+            elitismCount, width, height);
     population = ga.initPopulation();
     ga.evalPopulation(population);
 

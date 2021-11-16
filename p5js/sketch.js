@@ -36,7 +36,6 @@ function draw() {
     }
 }
 
-
 function drawBeing(being) {
     stroke(being.c);
     push();

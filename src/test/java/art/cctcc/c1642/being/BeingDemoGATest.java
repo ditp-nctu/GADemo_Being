@@ -75,7 +75,7 @@ public class BeingDemoGATest {
     individual.setSize(min_size / 2 + delta[0] + delta[1]);
     individual.refreshRing();
     assertEquals(ring, individual.getRing());
-    BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0);
+    BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0, UHDScreenWidth, UHDScreenHeight);
     double result = instance.calcFitness(individual);
     System.out.println("result = " + result);
   }

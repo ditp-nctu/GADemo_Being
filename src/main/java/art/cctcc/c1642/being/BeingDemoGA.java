@@ -26,10 +26,14 @@ import java.util.stream.Stream;
  */
 public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
+  float screenWidth, screenHeight;
+
   public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
-          int elitismCount) {
+          int elitismCount, float width, float height) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
+    this.screenWidth = width;
+    this.screenHeight = height;
   }
 
   @Override
