@@ -16,8 +16,10 @@
 
 var UHDScreenWidth = 3840;
 var UHDScreenHeight = 2160;
-var url = "http://localhost:8001/being/"; //modify when deployed to server
-var text_size = 48;
+//modify when deployed to server
+var url = "http://localhost:8001/being/";
+//var url = "http://172.104.72.71:8001/being/";
+var text_size = 50;
 var beings = new Map();
 var terminated = false;
 var data;
@@ -47,7 +49,7 @@ function setup() {
   var ratio = width > height ?
           1.0 * width / UHDScreenHeight : 1.0 * height / UHDScreenHeight;
   text_size *= ratio;
-  max_size = (256 * ratio) | 0;
+  max_size = (255 * ratio) | 0;
   url += session_id + "?max_size=" + max_size;
 }
 
@@ -55,6 +57,7 @@ function draw() {
   if (!terminated) {
     if (++timer >= frameRate() / 2) {
       timer = 0;
+      var newBeings = new Map();
       fetchBeings(url, data => {
         console.log('generation#', data.generation);
         data.population.forEach(b => {
@@ -64,7 +67,6 @@ function draw() {
             var y = random(height - b.size * 2) + b.size;
             being = new Being(b.size, x, y, b.color, b.delta, b.ring,
                     b.clockwise, b.qualified);
-            beings.set(b.id, being);
           } else {
             being = beings.get(b.id);
             being.color = b.color;
@@ -72,8 +74,9 @@ function draw() {
             being.ring = b.ring;
             being.qualified = b.qualified;
           }
+          newBeings.set(b.id, being);
         });
-
+        beings = newBeings;
         generation = data.generation;
         qualifiedCount = data.qualifiedCount;
         elitismCount = data.population.length;
@@ -100,7 +103,7 @@ function draw() {
 
 function drawBeing(being) {
   if (being.qualified) {
-    stroke(being.c | 0);
+    stroke(being.c);
   } else {
     stroke(being.delta[0] * 2, being.c, being.size);
   }
