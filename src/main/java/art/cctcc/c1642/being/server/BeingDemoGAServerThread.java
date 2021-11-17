@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2021 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
  *
@@ -68,10 +69,8 @@ public class BeingDemoGAServerThread {
             .map(Being::getInfo)
             .forEach(System.out::println);
     this.qualifiedCount = ga.getQualifiedCount(population);
-    System.out.printf(" Elitism fitness average=%.2f (population: %d/%d/%d)\n",
-            ga.getElitismFitnessAverage(population),
-            this.qualifiedCount, ga.getElitismCount(),
-            ga.getPopulationSize());
+    System.out.printf(" Elitism population: %d/%d/%d)\n",
+            this.qualifiedCount, ga.getElitismCount(), ga.getPopulationSize());
     return ga.isTerminationConditionMet(population);
   }
 }

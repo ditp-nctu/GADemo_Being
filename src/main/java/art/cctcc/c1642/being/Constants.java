@@ -39,7 +39,4 @@ public class Constants {
   public static int DefaultMinSize = 32;
   public static int DefaultMaxSize = 256;
   public static int DefaultChromosomeLength = 8 + 8 * (DefaultMaxRing - 1);
-
-  public static Predicate<Being> BeingQualifier
-          = being -> being.getRing() >= (DefaultMinRing + DefaultMaxRing) / 2;
 }

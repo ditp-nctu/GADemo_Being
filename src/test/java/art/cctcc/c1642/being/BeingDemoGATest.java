@@ -16,6 +16,8 @@
 package art.cctcc.c1642.being;
 
 import static art.cctcc.c1642.being.Constants.*;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,7 +68,6 @@ public class BeingDemoGATest {
   public void testCalcFitness() {
     System.out.println("calcFitness");
     Being individual = new Being(DefaultMaxSize);
-    int ring = 2;
     int[] delta = {225, 12, 8, 9, 3, 7, 8, 3, 8, 2, 2, 7, 6, 2, 7, 5, 11, 1, 3, 5, 16, 4, 12, 21};
     //{194, 3, 5, 5, 6, 2, 6, 6, 4, 5, 3, 1, 5, 2, 5, 1, 6, 5, 2, 9, 8, 4, 10, 9};
     //{247, 9, 9, 4, 8, 7, 8, 5, 6, 5, 8, 6, 6, 8, 6, 8, 1, 2, 7, 1, 9, 7, 13, 3};
@@ -74,6 +75,9 @@ public class BeingDemoGATest {
     assertEquals(delta, individual.getDelta());
     individual.setSize(DefaultMinSize / 2 + delta[0] + delta[1]);
     individual.refreshRing();
+    int ring = IntStream.range(0, delta.length)
+            .filter(i -> IntStream.of(delta).limit(i).sum() - individual.getSize() >= 0)
+            .findFirst().getAsInt();
     assertEquals(ring, individual.getRing());
     BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0, UHDScreenWidth, UHDScreenHeight);
     double result = instance.calcFitness(individual);

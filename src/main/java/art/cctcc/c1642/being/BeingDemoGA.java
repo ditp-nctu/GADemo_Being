@@ -17,6 +17,7 @@ package art.cctcc.c1642.being;
 
 import static art.cctcc.c1642.being.Constants.*;
 import ga.chapter2.GeneticAlgorithm;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -26,29 +27,39 @@ import java.util.stream.Stream;
  */
 public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
-  float screenWidth = BrowserScreenWidth;
-  float screenHeight = BrowserScreenHeight;
-  int max_size = Constants.DefaultMaxSize;
+  final float screenWidth;
+  final float screenHeight;
+  final int max_size;
+  public final Predicate<Being> beingQualifier;
 
   public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
           int elitismCount, float width, float height) {
 
-    this(populationSize, mutationRate, crossoverRate, elitismCount);
+    super(populationSize, mutationRate, crossoverRate, elitismCount);
+    this.max_size = Constants.DefaultMaxSize;
     this.screenWidth = width;
     this.screenHeight = height;
+    this.beingQualifier = being -> being.getRing() > DefaultMinRing * this.max_size / DefaultMaxSize;
   }
 
   public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
           int elitismCount) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
+    this.max_size = Constants.DefaultMaxSize;
+    this.screenWidth = BrowserScreenWidth;
+    this.screenHeight = BrowserScreenHeight;
+    this.beingQualifier = being -> being.getRing() > DefaultMinRing * this.max_size / DefaultMaxSize;
   }
 
   public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
           int elitismCount, int max_size) {
 
-    this(populationSize, mutationRate, crossoverRate, elitismCount);
+    super(populationSize, mutationRate, crossoverRate, elitismCount);
     this.max_size = max_size;
+    this.screenWidth = BrowserScreenWidth;
+    this.screenHeight = BrowserScreenHeight;
+    this.beingQualifier = being -> being.getRing() > DefaultMinRing * this.max_size / DefaultMaxSize;
   }
 
   @Override
@@ -57,8 +68,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     var population = new BeingPopulation(this.populationSize);
 
     for (int individualCount = 0; individualCount < this.populationSize; individualCount++) {
-      // Create an individual with unique size and initialize it
-      var individual = Stream.generate(() -> new Being(max_size))
+      var individual = Stream.generate(() -> new Being(this.max_size))
               .findAny()
               .get();
       var size = individual.getSize();
@@ -66,7 +76,6 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
       individual.setY(r.nextInt((int) screenHeight - size) + size / 2);
       individual.setColor(r.nextInt(256));
       individual.encodeGenes();
-      // Add individual to population
       population.setIndividual(individualCount, individual);
     }
     return population;
@@ -82,7 +91,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
     return IntStream.range(0, elitismCount)
             .mapToObj(i -> population.getFittest(i))
-            .filter(BeingQualifier)
+            .filter(beingQualifier)
             .count();
   }
 

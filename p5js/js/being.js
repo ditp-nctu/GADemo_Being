@@ -15,13 +15,15 @@
  */
 
 class Being {
-  constructor(size, x, y, c, delta, ring) {
+  constructor(size, x, y, c, delta, ring, clockwise, qualified) {
     this.size = size;
     this.x = x;
     this.y = y;
     this.c = c;
     this.delta = delta;
     this.ring = ring;
+    this.clockwise = clockwise;
+    this.qualified = qualified;
     let current_size = this.size;
     if (!delta) {
       this.delta = [];
@@ -43,7 +45,6 @@ class Being {
     if (random(1) > rate) {
       this.dx = random(-2, 2);
       this.dy = random(-2, 2);
-//      console.log(this.dx + ', ' + this.dy);
     }
   }
 

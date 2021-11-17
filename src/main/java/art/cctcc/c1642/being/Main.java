@@ -106,7 +106,7 @@ public class Main extends PApplet {
     noFill();
     for (var i = 0; i < ga.getElitismCount(); i++) {
       Being b = population.getFittest(i);
-      if (BeingQualifier.test(b)) {
+      if (ga.beingQualifier.test(b)) {
         stroke(b.getColor());
       } else {
         stroke(new Color(0, b.getColor(), 0).getRGB());

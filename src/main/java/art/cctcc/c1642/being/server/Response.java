@@ -38,7 +38,9 @@ public class Response {
               .put("color", being.getColor())
               .put("size", being.getSize())
               .put("ring", being.getRing())
-              .put("delta", being.getDelta());
+              .put("delta", being.getDelta())
+              .put("clockwise", being.isClockwise())
+              .put("qualified", session.getGa().beingQualifier.test(being));
       population.append(joBeing);
     }
     this.jo = new JSONObject()

@@ -52,8 +52,9 @@ public class Being extends Individual {
     this.size = r.nextInt(max_size - DefaultMinSize) + DefaultMinSize;
     this.color = r.nextInt(256);
     delta = new int[DefaultMaxRing - 1];
-    for (int j = 0; j < DefaultMaxRing - 1; j++) {
-      delta[j] = j == 0 ? (int) (this.size * (1.0 - Math.sqrt(0.5))) : (j % 2 == 0 ? r.nextInt(5) : 0);
+    delta[0] = (int) (this.size * (1.0 - Math.sqrt(0.5)));
+    for (int j = 1; j < DefaultMaxRing - 1; j++) {
+      delta[j] = j % 2 == 0 ? r.nextInt(5) : 0;
     }
     this.refreshRing();
     this.clockwise = r.nextDouble() > 0.5;
@@ -66,7 +67,7 @@ public class Being extends Individual {
     float current_size = this.size;
     for (int i = 0; i < DefaultMaxRing - 1; i++) {
       current_size -= delta[i];
-      if (current_size <= DefaultMinSize / 2.0 || i % 2 == 1 && delta[i] == 0) {
+      if (current_size <= 0 || i % 2 == 1 && delta[i] == 0) {
         break;
       }
       ring++;

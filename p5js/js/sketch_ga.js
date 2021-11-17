@@ -51,7 +51,6 @@ function setup() {
   url += session_id + "?max_size=" + max_size;
 }
 
-
 function draw() {
   if (!terminated) {
     if (++timer >= frameRate() / 2) {
@@ -63,7 +62,7 @@ function draw() {
           if (!beings.get(b.id)) {
             var x = random(width - b.size * 2) + b.size;
             var y = random(height - b.size * 2) + b.size;
-            being = new Being(b.size, x, y, b.color, b.delta, b.ring);
+            being = new Being(b.size, x, y, b.color, b.delta, b.ring, b.clockwise, b.qualified);
             beings.set(b.id, being);
           } else {
             being = beings.get(b.id);
@@ -88,6 +87,7 @@ function draw() {
     }
     beings.forEach(drawBeing);
     if (elitismCount > 0) {
+      noStroke();
       fill(bg > 128 ? 0 : 255);
       textSize(text_size);
       text("g=" + generation + ", t=" + qualifiedCount + "/" + elitismCount,
@@ -97,7 +97,11 @@ function draw() {
 }
 
 function drawBeing(being) {
-  stroke(being.c);
+  if (being.qualified) {
+    stroke(being.c);
+  } else {
+    stroke(being.delta[0] * 2, being.c, being.size);
+  }
   noFill();
   push();
   translate(being.x, being.y);
@@ -106,7 +110,7 @@ function drawBeing(being) {
     if (i % 2 == 0) {
       circle(0, 0, size);
     } else {
-      rotate(PI / being.delta[i - 1]);
+      rotate(random(0.97, 1.03) * PI / being.delta[i - 1] * (being.clockwise ? 1 : -1));
       rect(0, 0, size, size);
     }
     if (i < being.ring - 1)
