@@ -52,7 +52,9 @@ public class BeingDemoGAServerThread {
 
   public Response getResponse(String query, String msg) {
 
-    this.terminated = this.run();
+    if (!this.terminated) {
+      this.terminated = this.run();
+    }
     return new Response(this, query, msg);
   }
 

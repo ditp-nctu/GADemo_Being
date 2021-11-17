@@ -31,7 +31,7 @@ public class Constants {
   public static final float BrowserScreenWidth = 1024;
   public static final float BrowserScreenHeight = 768;
 
-  public static final int DefaultPopulationSize = 200;
+  public static final int DefaultPopulationSize = 180;
   public static final double DefaultMutationRate = 0.95;
   public static final double DefaultCrossoverRate = 0.95;
   public static int DefaultMaxRing = 25;

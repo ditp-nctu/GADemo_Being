@@ -16,7 +16,7 @@
 
 var UHDScreenWidth = 3840;
 var UHDScreenHeight = 2160;
-var url = "http://localhost:8001/being/";
+var url = "http://localhost:8001/being/"; //modify when deployed to server
 var text_size = 48;
 var beings = new Map();
 var terminated = false;
@@ -47,7 +47,7 @@ function setup() {
   var ratio = width > height ?
           1.0 * width / UHDScreenHeight : 1.0 * height / UHDScreenHeight;
   text_size *= ratio;
-  max_size = (int)(256 * ratio);
+  max_size = (256 * ratio) | 0;
   url += session_id + "?max_size=" + max_size;
 }
 
@@ -62,13 +62,15 @@ function draw() {
           if (!beings.get(b.id)) {
             var x = random(width - b.size * 2) + b.size;
             var y = random(height - b.size * 2) + b.size;
-            being = new Being(b.size, x, y, b.color, b.delta, b.ring, b.clockwise, b.qualified);
+            being = new Being(b.size, x, y, b.color, b.delta, b.ring,
+                    b.clockwise, b.qualified);
             beings.set(b.id, being);
           } else {
             being = beings.get(b.id);
             being.color = b.color;
             being.delta = b.delta;
             being.ring = b.ring;
+            being.qualified = b.qualified;
           }
         });
 
@@ -98,7 +100,7 @@ function draw() {
 
 function drawBeing(being) {
   if (being.qualified) {
-    stroke(being.c);
+    stroke(being.c | 0);
   } else {
     stroke(being.delta[0] * 2, being.c, being.size);
   }

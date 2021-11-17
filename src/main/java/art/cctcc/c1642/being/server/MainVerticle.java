@@ -62,17 +62,12 @@ public class MainVerticle extends AbstractVerticle {
     if (sessions.containsKey(session_id)) {
       thread = sessions.get(session_id);
     } else {
-      thread = new BeingDemoGAServerThread(session_id,
-              DefaultPopulationSize,
+      thread = new BeingDemoGAServerThread(session_id, DefaultPopulationSize,
               DefaultMutationRate, DefaultCrossoverRate, max_size);
       sessions.put(session_id, thread);
     }
     var response = thread.getResponse(ctx.request().query(), msg);
-    if (thread.isTerminated()) {
-      sessions.remove(session_id);
-    }
-
-    logger.log(Level.INFO, " response = {0}", response.jo.getString("session_id"));
+    logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
     ctx.response()
             .putHeader("content-type", "application/json")
             .end(response.toString());
