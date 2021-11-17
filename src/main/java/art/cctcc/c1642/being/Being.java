@@ -5,14 +5,17 @@ import art.cctcc.c1642.being.ex.UnexpectedGeneticCode;
 import ga.chapter2.Individual;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 public class Being extends Individual {
 
+  private final UUID id;
   private int size;
   private int x;
   private int y;
@@ -23,31 +26,33 @@ public class Being extends Individual {
   private int[] delta;
   private boolean clockwise;
 
-  public Being(int x, int y, int dx, int dy, int color, boolean clockwise) {
+  public Being(UUID id, int x, int y, int dx, int dy, int color, boolean clockwise) {
 
-    super(new int[chromosomeLength]);
+    super(new int[DefaultChromosomeLength]);
+    this.id = id;
     this.x = x;
     this.y = y;
     this.dx = dx;
     this.dy = dy;
     this.color = color;
     this.clockwise = clockwise;
-    this.delta = new int[max_ring - 1];
+    this.delta = new int[DefaultMaxRing - 1];
   }
 
   public Being(Being original) {
 
-    this(original.getX(), original.getY(), original.getDx(), original.getDy(),
+    this(original.getId(), original.getX(), original.getY(), original.getDx(), original.getDy(),
             original.getColor(), original.isClockwise());
   }
 
-  public Being() {
+  public Being(int max_size) {
 
-    super(chromosomeLength = 8 + 8 * (max_ring - 1));
-    this.size = r.nextInt(max_size - min_size) + min_size;
+    super(DefaultChromosomeLength);
+    this.id = UUID.randomUUID();
+    this.size = r.nextInt(max_size - DefaultMinSize) + DefaultMinSize;
     this.color = r.nextInt(256);
-    delta = new int[max_ring - 1];
-    for (int j = 0; j < max_ring - 1; j++) {
+    delta = new int[DefaultMaxRing - 1];
+    for (int j = 0; j < DefaultMaxRing - 1; j++) {
       delta[j] = j == 0 ? (int) (this.size * (1.0 - Math.sqrt(0.5))) : (j % 2 == 0 ? r.nextInt(5) : 0);
     }
     this.refreshRing();
@@ -59,9 +64,9 @@ public class Being extends Individual {
 
     this.ring = 1;
     float current_size = this.size;
-    for (int i = 0; i < max_ring - 1; i++) {
+    for (int i = 0; i < DefaultMaxRing - 1; i++) {
       current_size -= delta[i];
-      if (current_size <= min_size / 2.0 || i % 2 == 1 && delta[i] == 0) {
+      if (current_size <= DefaultMinSize / 2.0 || i % 2 == 1 && delta[i] == 0) {
         break;
       }
       ring++;
@@ -84,7 +89,7 @@ public class Being extends Individual {
   public void encodeGenes() {
 
     var chromosome = this.getSizeGene() + this.getDeltaGene();
-    for (var i = 0; i < chromosomeLength; i++) {
+    for (var i = 0; i < DefaultChromosomeLength; i++) {
       switch (chromosome.toCharArray()[i]) {
         case '1' -> setGene(i, 1);
         case '0' -> setGene(i, 0);
@@ -95,7 +100,7 @@ public class Being extends Individual {
 
   public void decodeGenes() {
 
-    var chromosome = IntStream.range(0, chromosomeLength)
+    var chromosome = IntStream.range(0, DefaultChromosomeLength)
             .mapToObj(this::getGene)
             .map(String::valueOf)
             .collect(Collectors.joining());

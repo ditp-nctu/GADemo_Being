@@ -19,60 +19,59 @@ import art.cctcc.c1642.being.Being;
 import art.cctcc.c1642.being.BeingDemoGA;
 import art.cctcc.c1642.being.BeingPopulation;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.IntStream;
+import lombok.Getter;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class BeingDemoGAServerThread implements Runnable {
+@Getter
+public class BeingDemoGAServerThread {
 
-  static final Map<String, BeingDemoGAServerThread> sessions = new HashMap<>();
+  private final String session_id;
+  private final BeingDemoGA ga;
 
-  final String session_id;
-  final BeingDemoGA ga;
-  final float max_ring;
-
-  int generation = 1;
-  BeingPopulation population;
+  private int generation;
+  private BeingPopulation population;
+  private boolean terminated;
+  private long qualifiedCount;
 
   public BeingDemoGAServerThread(String session_id,
           int populationSize, double mutationRate, double crossoverRate,
-          float width, float height) {
+          int max_size) {
+
     this.session_id = session_id;
-    this.max_ring = 40 * width / 3840;
+    var elitismCount = populationSize * 30 / 100;
     ga = new BeingDemoGA(populationSize, mutationRate, crossoverRate,
-            populationSize * 30 / 100, width, height);
+            elitismCount, max_size);
     population = ga.initPopulation();
     ga.evalPopulation(population);
-    new Thread(this).start();
   }
 
   public Response getResponse(String query, String msg) {
 
+    this.terminated = this.run();
     return new Response(this, query, msg);
   }
 
-  @Override
-  public void run() {
-    while (!ga.isTerminationConditionMet(population)) {
-      System.out.printf("========== generation#%d ==========\n", generation++);
-      population = ga.crossoverPopulation(population);
-      population = ga.mutatePopulation(population);
-      System.out.println();
-      ga.evalPopulation(population);
-      IntStream.range(0, ga.getElitismCount())
-              .mapToObj(population::getFittest)
-              .sorted(Comparator.comparing(Being::getSize))
-              .map(Being::getInfo)
-              .forEach(System.out::println);
-      System.out.printf(" Elitism fitness average=%.2f (population: %d/%d)\n",
-              ga.getElitismFitnessAverage(population),
-              ga.getElitismCount(), ga.getPopulationSize());
-    }
-    sessions.remove(this.session_id);
-  }
+  public boolean run() {
 
+    System.out.printf("========== generation#%d ==========\n", generation++);
+    population = ga.crossoverPopulation(population);
+    population = ga.mutatePopulation(population);
+    System.out.println();
+    ga.evalPopulation(population);
+    IntStream.range(0, ga.getElitismCount())
+            .mapToObj(population::getFittest)
+            .sorted(Comparator.comparing(Being::getSize))
+            .map(Being::getInfo)
+            .forEach(System.out::println);
+    this.qualifiedCount = ga.getQualifiedCount(population);
+    System.out.printf(" Elitism fitness average=%.2f (population: %d/%d/%d)\n",
+            ga.getElitismFitnessAverage(population),
+            this.qualifiedCount, ga.getElitismCount(),
+            ga.getPopulationSize());
+    return ga.isTerminationConditionMet(population);
+  }
 }

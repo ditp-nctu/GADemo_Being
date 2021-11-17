@@ -16,6 +16,7 @@
 package art.cctcc.c1642.being;
 
 import static art.cctcc.c1642.being.Constants.*;
+import java.awt.Color;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 import processing.core.PApplet;
@@ -28,34 +29,23 @@ public class Main extends PApplet {
 
   BeingDemoGA ga;
   BeingPopulation population;
-  int generation = 1;
+  int generation;
   float text_size;
   float bg = 100;
   int inc = 1;
+  boolean interrupted;
 
-  @Override
-  public void settings() {
+  Runnable gaThread = () -> {
 
-    fullScreen();
-  }
-
-  @Override
-  public void setup() {
-
-    rectMode(CENTER);
-    strokeWeight(1);
-    text_size = 50 * width / 3840;
-    max_ring = 40 * width / 3840;
-    int elitismCount = DefaultPopulationSize * 30 / 100;
-    ga = new BeingDemoGA(DefaultPopulationSize,
-            DefaultMutationRate, DefaultCrossoverRate,
-            elitismCount, width, height);
-    population = ga.initPopulation();
-    ga.evalPopulation(population);
-
-    new Thread(() -> {
-      while (!ga.isTerminationConditionMet(population)) {
-        System.out.printf("========== generation#%d ==========\n", generation++);
+    while (true) {
+      if (!ga.isTerminationConditionMet(population) && !interrupted) {
+        if (generation == 0) {
+          try {
+            Thread.sleep(3000);
+          } catch (InterruptedException ex) {
+          }
+        }
+        System.out.printf("========== generation#%d ==========\n", ++generation);
         population = ga.crossoverPopulation(population);
         population = ga.mutatePopulation(population);
         System.out.println();
@@ -68,19 +58,59 @@ public class Main extends PApplet {
         System.out.printf(" Elitism fitness average=%.2f (population: %d/%d)\n",
                 ga.getElitismFitnessAverage(population),
                 ga.getElitismCount(), ga.getPopulationSize());
+      } else if (interrupted) {
+        population = ga.initPopulation();
+        ga.evalPopulation(population);
+        generation = 0;
+        interrupted = false;
+      } else {
+        try {
+          Thread.sleep(500);
+        } catch (InterruptedException ex) {
+        }
       }
-    }).start();
+    }
+  };
+
+  @Override
+  public void settings() {
+
+    fullScreen();
+  }
+
+  @Override
+  public void setup() {
+
+    rectMode(CENTER);
+    strokeWeight(1);
+    float ratio = height > width ? 1.0f * width / UHDScreenHeight : 1.0f * height / UHDScreenWidth;
+    text_size = 72 * ratio;
+    DefaultMaxRing = (int) (40 * ratio);
+    DefaultChromosomeLength = 8 + 8 * (DefaultMaxRing - 1);
+    int elitismCount = DefaultPopulationSize * 30 / 100;
+    ga = new BeingDemoGA(DefaultPopulationSize,
+            DefaultMutationRate, DefaultCrossoverRate,
+            elitismCount, width, height);
+    population = ga.initPopulation();
+    ga.evalPopulation(population);
+    new Thread(gaThread).start();
   }
 
   @Override
   public void draw() {
 
     background(bg += inc);
-    if (bg >= 255 || bg <= 0) inc = -inc;
+    if (bg >= 255 || bg <= 0) {
+      inc = -inc;
+    }
     noFill();
     for (var i = 0; i < ga.getElitismCount(); i++) {
       Being b = population.getFittest(i);
-      stroke(b.getColor());
+      if (BeingQualifier.test(b)) {
+        stroke(b.getColor());
+      } else {
+        stroke(new Color(0, b.getColor(), 0).getRGB());
+      }
       pushMatrix();
       translate(b.getX(), b.getY());
       var size = b.getSize();
@@ -91,14 +121,15 @@ public class Main extends PApplet {
           rotate(random(0.99f, 1.01f) * PI / (1.0f + b.getDelta()[j - 1]) * (b.isClockwise() ? 1 : -1));
           rect(0, 0, size, size);
         }
-        size -= b.getDelta()[j];
+        if (j < b.getDelta().length) {
+          size -= b.getDelta()[j];
+        }
       }
       popMatrix();
       b.move();
       if ((b.getX() + 0.5 * b.getSize()) > width || (b.getX() - 0.5 * b.getSize()) < 0) {
         b.reverseDir("x");
-      }
-      if ((b.getY() + 0.5 * b.getSize()) > height || (b.getY() - 0.5 * b.getSize()) < 0) {
+      } else if ((b.getY() + 0.5 * b.getSize()) > height || (b.getY() - 0.5 * b.getSize()) < 0) {
         b.reverseDir("y");
       }
     }
@@ -112,9 +143,7 @@ public class Main extends PApplet {
   @Override
   public void mouseClicked() {
 
-    population = ga.initPopulation();
-    ga.evalPopulation(population);
-    generation = 1;
+    interrupted = true;
   }
 
   public static void main(String[] args) {

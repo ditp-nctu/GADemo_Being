@@ -16,6 +16,7 @@
 package art.cctcc.c1642.being;
 
 import java.util.Arrays;
+import java.util.UUID;
 import static java.util.function.Predicate.not;
 import processing.core.PApplet;
 
@@ -46,15 +47,44 @@ public class TestDraw extends PApplet {
 
   @Override
   public void draw() {
-//               55.157   82  39 {1, 2, 2, 1, 1, 2, 1, 1, 2, 2, 1, 1, 3, 2, 1, 1, 1, 3, 3, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 3, 2, 4, 1, 1, 1, 9}
-//               54.914   87  39 {2, 1, 1, 1, 1, 3, 1, 1, 1, 3, 2, 1, 2, 1, 2, 2, 2, 3, 2, 1, 1, 3, 2, 2, 3, 1, 1, 1, 3, 1, 1, 3, 1, 3, 2, 2, 5, 1, 5}
-//               55.840   92  40 {1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 3, 2, 1, 2, 3, 3, 4, 1, 2, 5, 5, 4}
-//               55.813   95  40 {1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 2, 1, 2, 2, 1, 1, 1, 3, 1, 2, 1, 2, 2, 3, 2, 2, 1, 2, 3, 1, 3, 1, 2, 6, 2, 3, 2, 1}
-//               54.429   96  39 {2, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 3, 1, 1, 1, 1, 3, 1, 2, 3, 1, 1, 1, 2, 3, 2, 1, 4, 2, 1, 2, 3, 3, 1, 3, 4, 5, 1, 10}
-//               56.043   98  40 {1, 2, 2, 2, 1, 3, 2, 3, 3, 2, 2, 3, 1, 3, 3, 2, 3, 2, 1, 2, 2, 3, 3, 2, 1, 1, 2, 1, 1, 1, 2, 4, 1, 1, 3, 5, 1, 1, 2}
-//               55.946   99  40 {2, 1, 3, 2, 1, 2, 2, 3, 3, 1, 2, 3, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 1, 3, 2, 1, 4, 1, 2, 3, 2, 1, 3, 2, 2, 3, 1, 1, 5}
-//               54.424  101  39 {1, 3, 2, 1, 1, 1, 2, 2, 3, 2, 2, 3, 2, 3, 2, 1, 1, 3, 1, 3, 2, 1, 2, 1, 3, 4, 2, 4, 1, 3, 1, 1, 1, 3, 4, 1, 6, 5, 8}
-    var infos = """
+    Arrays.stream(infos)
+            .filter(not(String::isEmpty))
+            .forEach(line -> {
+              var info = Arrays.stream(line.replaceAll("[{,}]", "").split(" "))
+                      .filter(not(String::isEmpty))
+                      .toList();
+              var b = new Being(UUID.randomUUID(), (int) random(width), (int) random(height), 0, 0, 255, true);
+              b.setSize(Integer.valueOf(info.get(1)));
+              b.setDelta(info.stream().skip(3).mapToInt(Integer::valueOf).toArray());
+              var ring = b.refreshRing();
+              System.out.println("ring = " + ring);
+              pushMatrix();
+              translate(b.getX(), b.getY());
+              var size = b.getSize();
+              for (int j = 0; j < b.getRing() - 1; j++) {
+                if (j % 2 == 0) {
+                  circle(0, 0, size);
+                } else {
+                  rotate(PI / (float) (b.getDelta()[j - 1] + 1.0) * (b.isClockwise() ? 1 : -1));
+                  rect(0, 0, size, size);
+                }
+                size -= b.getDelta()[j];
+                System.out.println("size = " + size);
+              }
+              popMatrix();
+            });
+//    Assertions.assertEquals(40, b.getRing());
+  }
+
+  //               55.157   82  39 {1, 2, 2, 1, 1, 2, 1, 1, 2, 2, 1, 1, 3, 2, 1, 1, 1, 3, 3, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 3, 2, 4, 1, 1, 1, 9}
+  //               54.914   87  39 {2, 1, 1, 1, 1, 3, 1, 1, 1, 3, 2, 1, 2, 1, 2, 2, 2, 3, 2, 1, 1, 3, 2, 2, 3, 1, 1, 1, 3, 1, 1, 3, 1, 3, 2, 2, 5, 1, 5}
+  //               55.840   92  40 {1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 3, 2, 1, 2, 3, 3, 4, 1, 2, 5, 5, 4}
+  //               55.813   95  40 {1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 2, 1, 2, 2, 1, 1, 1, 3, 1, 2, 1, 2, 2, 3, 2, 2, 1, 2, 3, 1, 3, 1, 2, 6, 2, 3, 2, 1}
+  //               54.429   96  39 {2, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 3, 1, 1, 1, 1, 3, 1, 2, 3, 1, 1, 1, 2, 3, 2, 1, 4, 2, 1, 2, 3, 3, 1, 3, 4, 5, 1, 10}
+  //               56.043   98  40 {1, 2, 2, 2, 1, 3, 2, 3, 3, 2, 2, 3, 1, 3, 3, 2, 3, 2, 1, 2, 2, 3, 3, 2, 1, 1, 2, 1, 1, 1, 2, 4, 1, 1, 3, 5, 1, 1, 2}
+  //               55.946   99  40 {2, 1, 3, 2, 1, 2, 2, 3, 3, 1, 2, 3, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 1, 3, 2, 1, 4, 1, 2, 3, 2, 1, 3, 2, 2, 3, 1, 1, 5}
+  //               54.424  101  39 {1, 3, 2, 1, 1, 1, 2, 2, 3, 2, 2, 3, 2, 3, 2, 1, 1, 3, 1, 3, 2, 1, 2, 1, 3, 4, 2, 4, 1, 3, 1, 1, 1, 3, 4, 1, 6, 5, 8}
+  static String[] infos = """
                55.248  104  40 {1, 1, 0, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 3, 2, 1, 2, 3, 3, 4, 1, 2, 5, 5, 4}
                """.split("\n");
 //               54.392  106  39 {1, 3, 2, 1, 2, 1, 3, 3, 2, 3, 2, 3, 2, 2, 2, 3, 2, 2, 1, 2, 4, 1, 2, 2, 4, 1, 1, 2, 2, 2, 4, 1, 2, 3, 6, 6, 2, 2, 8}
@@ -109,32 +139,4 @@ public class TestDraw extends PApplet {
 //               54.281  185  40 {4, 1, 3, 4, 3, 2, 3, 3, 2, 5, 4, 3, 1, 3, 4, 5, 5, 5, 6, 4, 4, 1, 3, 2, 4, 2, 2, 3, 5, 3, 8, 4, 3, 7, 9, 1, 1, 1, 24}
 //               54.881  253  40 {1, 6, 66, 65, 2, 2, 2, 17, 1, 1, 2, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 3, 2, 1, 2, 9, 7, 4, 1, 2, 5, 5, 4}
 //               """.split("\n");
-    Arrays.stream(infos)
-            .filter(not(String::isEmpty))
-            .forEach(line -> {
-              var info = Arrays.stream(line.replaceAll("[{,}]", "").split(" "))
-                      .filter(not(String::isEmpty))
-                      .toList();
-              var b = new Being((int) random(width), (int) random(height), 0, 0, 255, true);
-              b.setSize(Integer.valueOf(info.get(1)));
-              b.setDelta(info.stream().skip(3).mapToInt(Integer::valueOf).toArray());
-              var ring = b.refreshRing();
-              System.out.println("ring = " + ring);
-              pushMatrix();
-              translate(b.getX(), b.getY());
-              var size = b.getSize();
-              for (int j = 0; j < b.getRing() - 1; j++) {
-                if (j % 2 == 0) {
-                  circle(0, 0, size);
-                } else {
-                  rotate(PI / (float) (b.getDelta()[j - 1] + 1.0) * (b.isClockwise() ? 1 : -1));
-                  rect(0, 0, size, size);
-                }
-                size -= b.getDelta()[j];
-                System.out.println("size = " + size);
-              }
-              popMatrix();
-            });
-//    Assertions.assertEquals(40, b.getRing());
-  }
 }

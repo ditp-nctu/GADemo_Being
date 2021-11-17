@@ -26,14 +26,29 @@ import java.util.stream.Stream;
  */
 public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
-  float screenWidth, screenHeight;
+  float screenWidth = BrowserScreenWidth;
+  float screenHeight = BrowserScreenHeight;
+  int max_size = Constants.DefaultMaxSize;
 
   public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
           int elitismCount, float width, float height) {
 
-    super(populationSize, mutationRate, crossoverRate, elitismCount);
+    this(populationSize, mutationRate, crossoverRate, elitismCount);
     this.screenWidth = width;
     this.screenHeight = height;
+  }
+
+  public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
+          int elitismCount) {
+
+    super(populationSize, mutationRate, crossoverRate, elitismCount);
+  }
+
+  public BeingDemoGA(int populationSize, double mutationRate, double crossoverRate,
+          int elitismCount, int max_size) {
+
+    this(populationSize, mutationRate, crossoverRate, elitismCount);
+    this.max_size = max_size;
   }
 
   @Override
@@ -43,7 +58,7 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
 
     for (int individualCount = 0; individualCount < this.populationSize; individualCount++) {
       // Create an individual with unique size and initialize it
-      var individual = Stream.generate(Being::new)
+      var individual = Stream.generate(() -> new Being(max_size))
               .findAny()
               .get();
       var size = individual.getSize();
@@ -66,8 +81,8 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
   public long getQualifiedCount(BeingPopulation population) {
 
     return IntStream.range(0, elitismCount)
-            .map(i -> population.getFittest(i).getRing())
-            .filter(ring -> ring >= (min_ring + max_ring) / 2)
+            .mapToObj(i -> population.getFittest(i))
+            .filter(BeingQualifier)
             .count();
   }
 
@@ -92,8 +107,9 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     }
     var deltaScore = (being.getRing() == 1) ? 0.0
             : (1.0 / (deltaScoreBase / (being.getRing() - 1) + 1.0));
-    var ringScore = 1.0 * being.getRing() / max_ring;
-    var fitness = (deltaScore * 1.0 + ringScore * 9.0) / 10;
+    var ringScore = 1.0 * being.getRing() / DefaultMaxRing;
+    var fitness = being.getSize() > this.max_size ? 0
+            : (deltaScore * 1.0 + ringScore * 9.0) / 10;
     being.setFitness(fitness);
     return fitness;
   }
@@ -102,40 +118,28 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
   public BeingPopulation crossoverPopulation(BeingPopulation population) {
 
     var crossoverCounter = 0;
-    // Create new population
     var newPopulation = new BeingPopulation(this.populationSize);
-
-    // Loop over current population by fitness
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var parent1 = population.getFittest(populationIndex);
-      // Apply crossover to this individual?
       if (populationIndex < this.elitismCount || this.crossoverRate < r.nextDouble()) {
-        // Add individual to new population without applying crossover
         newPopulation.setIndividual(populationIndex, parent1);
       } else {
-        // Initialize offspring
         var offspring = new Being(parent1);
-
-        // Find second parent
         var parent2 = selectParent(population);
-
-        // Loop over genome
-        var crossover = r.nextInt(chromosomeLength / 20) + 1;
+        var crossover = r.nextInt(DefaultChromosomeLength / 20) + 1;
         var crossoverCites = Stream.generate(() -> r.nextInt(parent1.getChromosomeLength()))
                 .distinct()
                 .limit(crossover)
                 .toList();
         var usingFirst = true;
         for (var geneIndex = 0; geneIndex < parent1.getChromosomeLength(); geneIndex++) {
-          // 3 crossover cites at most with 10% swapping rate
           if (crossoverCites.contains(geneIndex)) {
             usingFirst = !usingFirst;
           }
           offspring.setGene(geneIndex, (usingFirst ? parent1 : parent2).getGene(geneIndex));
         }
         offspring.decodeGenes();
-        // Add offspring to new population
-        if (population.containsSameSize(offspring, elitismCount)) {
+        if (population.containsSameSize(offspring)) {
           newPopulation.setIndividual(populationIndex, parent1);
         } else {
           newPopulation.setIndividual(populationIndex, offspring);
@@ -153,36 +157,28 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
   public BeingPopulation mutatePopulation(BeingPopulation population) {
 
     var mutationCounter = 0;
-    // Initialize new population
     var newPopulation = new BeingPopulation(this.populationSize);
-
-    // Loop over current population by fitness
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var being = population.getFittest(populationIndex);
-      // Skip mutation if this is an elite individual
       if (populationIndex < this.elitismCount || this.mutationRate < r.nextDouble()) {
         newPopulation.setIndividual(populationIndex, being);
       } else {
         var newBeing = new Being(being);
-        var mutation = r.nextInt(chromosomeLength / 10) + 1;
+        var mutation = r.nextInt(DefaultChromosomeLength / 10) + 1;
         var mutationCites = Stream.generate(() -> r.nextInt(being.getChromosomeLength()))
                 .distinct()
                 .limit(mutation)
                 .toList();
-        // Loop over individual's genes
         for (int geneIndex = 0; geneIndex < being.getChromosomeLength(); geneIndex++) {
-          // Does this gene need mutation?
           if (mutationCites.contains(geneIndex)) {
-            // Get new gene
             int newGene = (being.getGene(geneIndex) == 1) ? 0 : 1;
-            // Mutate gene
             newBeing.setGene(geneIndex, newGene);
           } else {
             newBeing.setGene(geneIndex, being.getGene(geneIndex));
           }
         }
         newBeing.decodeGenes();
-        if (population.containsSameSize(newBeing, elitismCount)) {
+        if (population.containsSameSize(newBeing)) {
           newPopulation.setIndividual(populationIndex, being);
         } else {
           newBeing.setColor(r.nextInt(256));
@@ -195,7 +191,6 @@ public class BeingDemoGA extends GeneticAlgorithm<BeingPopulation, Being> {
     }
     System.out.print((mutationCounter > 0) ? "\n" : "");
     System.out.print(" mutationCounter=" + mutationCounter);
-    // Return mutated population
     return newPopulation;
   }
 }

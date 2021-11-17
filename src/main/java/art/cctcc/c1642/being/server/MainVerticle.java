@@ -15,6 +15,7 @@
  */
 package art.cctcc.c1642.being.server;
 
+import art.cctcc.c1642.being.Constants;
 import static art.cctcc.c1642.being.Constants.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,20 +23,26 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.CorsHandler;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainVerticle extends AbstractVerticle {
 
   static final Logger logger = Logger.getGlobal();
-
+  static final Map<String, BeingDemoGAServerThread> sessions = new HashMap<>();
   int port = 8001;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
 
     var router = Router.router(vertx);
-    router.get("/being/:session").handler(this::_beingGA);
+    router.route().handler(CorsHandler.create("*")
+            .allowedMethod(io.vertx.core.http.HttpMethod.GET)
+            .allowedHeader("Access-Control-Allow-Headers")
+            .allowedHeader("Content-Type"));
+    router.get("/being/:session_id")
+            .handler(this::_beingGA);
     vertx.createHttpServer()
             .requestHandler(router)
             .listen(port);
@@ -44,30 +51,28 @@ public class MainVerticle extends AbstractVerticle {
 
   public void _beingGA(RoutingContext ctx) {
 
-    var queryParams = ctx.queryParams();
     var msg = "ok";
-    float width = BrowserScreenWidth, height = BrowserScreenHeight;
-    try {
-      width = Float.parseFloat(queryParams.get("width"));
-      height = Float.parseFloat(queryParams.get("height"));
-    } catch (NumberFormatException e) {
-      msg = "Invalid query, using defaults.";
-      logger.log(Level.INFO, " {0}", msg);
-    }
-    var session_id = queryParams.get("session");
-    var query = ctx.request().query();
-
+    var session_id = ctx.pathParam("session_id");
+    System.out.println("Accepting request: session_id=" + session_id);
+    var queryParams = ctx.queryParams();
+    var max_size = queryParams.contains("max_size")
+            ? Integer.parseInt(queryParams.get("max_size"))
+            : Constants.DefaultMaxSize;
     BeingDemoGAServerThread thread = null;
-    if (BeingDemoGAServerThread.sessions.containsKey(session_id)) {
-      thread = BeingDemoGAServerThread.sessions.get(session_id);
+    if (sessions.containsKey(session_id)) {
+      thread = sessions.get(session_id);
     } else {
       thread = new BeingDemoGAServerThread(session_id,
               DefaultPopulationSize,
-              DefaultMutationRate, DefaultCrossoverRate,
-              width, height);
+              DefaultMutationRate, DefaultCrossoverRate, max_size);
+      sessions.put(session_id, thread);
     }
-    var response = thread.getResponse(query, msg);
-    logger.log(Level.INFO, " response = {0}", response);
+    var response = thread.getResponse(ctx.request().query(), msg);
+    if (thread.isTerminated()) {
+      sessions.remove(session_id);
+    }
+
+    logger.log(Level.INFO, " response = {0}", response.jo.getString("session_id"));
     ctx.response()
             .putHeader("content-type", "application/json")
             .end(response.toString());

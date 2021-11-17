@@ -16,6 +16,7 @@
 package art.cctcc.c1642.being.server;
 
 import processing.core.PApplet;
+import processing.data.JSONArray;
 import processing.data.JSONObject;
 
 /**
@@ -27,11 +28,26 @@ public class Response {
   static PApplet p = new PApplet();
   public final JSONObject jo;
 
-  public Response(BeingDemoGAServerThread being, String query, String msg) {
+  public Response(BeingDemoGAServerThread session, String query, String msg) {
 
+    var population = new JSONArray();
+    for (int i = 0; i < session.getGa().getElitismCount(); i++) {
+      var being = session.getPopulation().getFittest(i);
+      var joBeing = new JSONObject()
+              .put("id", being.getId())
+              .put("color", being.getColor())
+              .put("size", being.getSize())
+              .put("ring", being.getRing())
+              .put("delta", being.getDelta());
+      population.append(joBeing);
+    }
     this.jo = new JSONObject()
+            .put("session_id", session.getSession_id())
             .put("query", query)
-            //TODO
+            .put("terminated", session.isTerminated())
+            .put("generation", session.getGeneration())
+            .put("population", population)
+            .put("qualifiedCount", session.getQualifiedCount())
             .put("message", msg);
   }
 

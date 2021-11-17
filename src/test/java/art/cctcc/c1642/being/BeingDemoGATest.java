@@ -65,14 +65,14 @@ public class BeingDemoGATest {
   @Test
   public void testCalcFitness() {
     System.out.println("calcFitness");
-    Being individual = new Being();
+    Being individual = new Being(DefaultMaxSize);
     int ring = 2;
     int[] delta = {225, 12, 8, 9, 3, 7, 8, 3, 8, 2, 2, 7, 6, 2, 7, 5, 11, 1, 3, 5, 16, 4, 12, 21};
     //{194, 3, 5, 5, 6, 2, 6, 6, 4, 5, 3, 1, 5, 2, 5, 1, 6, 5, 2, 9, 8, 4, 10, 9};
     //{247, 9, 9, 4, 8, 7, 8, 5, 6, 5, 8, 6, 6, 8, 6, 8, 1, 2, 7, 1, 9, 7, 13, 3};
     individual.setDelta(delta);
     assertEquals(delta, individual.getDelta());
-    individual.setSize(min_size / 2 + delta[0] + delta[1]);
+    individual.setSize(DefaultMinSize / 2 + delta[0] + delta[1]);
     individual.refreshRing();
     assertEquals(ring, individual.getRing());
     BeingDemoGA instance = new BeingDemoGA(1, 0, 0, 0, UHDScreenWidth, UHDScreenHeight);
@@ -116,7 +116,7 @@ public class BeingDemoGATest {
   @Disabled
   public void testSize() {
     System.out.println("size");
-    for (int i = min_size; i < max_size; i++) {
+    for (int i = DefaultMinSize; i < DefaultMaxSize; i++) {
       var sizeScore = (Math.cos(i / 3.14) + 1) / 2;
       System.out.printf("i = %3d", i);
       System.out.println(", sizeScore = " + "*".repeat((int) (sizeScore * 10)));

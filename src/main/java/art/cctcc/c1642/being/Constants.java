@@ -16,6 +16,7 @@
 package art.cctcc.c1642.being;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  *
@@ -33,9 +34,12 @@ public class Constants {
   public static final int DefaultPopulationSize = 200;
   public static final double DefaultMutationRate = 0.95;
   public static final double DefaultCrossoverRate = 0.95;
-  public static int max_ring = 25;
-  public static int min_ring = 10;
-  public static int min_size = 32;
-  public static int max_size = 256;
-  public static int chromosomeLength = 8 + 8 * (max_ring - 1);
+  public static int DefaultMaxRing = 25;
+  public static int DefaultMinRing = 10;
+  public static int DefaultMinSize = 32;
+  public static int DefaultMaxSize = 256;
+  public static int DefaultChromosomeLength = 8 + 8 * (DefaultMaxRing - 1);
+
+  public static Predicate<Being> BeingQualifier
+          = being -> being.getRing() >= (DefaultMinRing + DefaultMaxRing) / 2;
 }
