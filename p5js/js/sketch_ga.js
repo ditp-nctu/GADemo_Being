@@ -17,7 +17,7 @@
 var UHDScreenWidth = 3840;
 var UHDScreenHeight = 2160;
 //modify when deployed to server
-var url = "http://localhost:8001/being/";
+var url = "http://" + (location.host || "localhost") + ":8001/being/";
 //var url = "http://172.104.72.71:8001/being/";
 var text_size = 50;
 var beings = new Map();
