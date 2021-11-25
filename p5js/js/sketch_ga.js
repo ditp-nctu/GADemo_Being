@@ -19,13 +19,11 @@ var UHDScreenHeight = 2160;
 //modify when deployed to server
 var url = "http://" + (location.host || "localhost") + ":8001/being/";
 //var url = "http://172.104.72.71:8001/being/";
-var text_size = 50;
-var beings = new Map();
-var terminated = false;
-var data;
+var text_size
+var beings;
+var terminated;
 var max_size;
-var session_id;
-var timer = 0;
+var timer;
 var bg = 100;
 var inc = 1;
 var generation;
@@ -41,21 +39,25 @@ async function fetchBeings(url, callback) {
 }
 
 function setup() {
-
+  
   createCanvas(windowWidth, windowHeight);
+  frameRate(30);
   rectMode(CENTER);
   strokeWeight(1);
-  session_id = uuidv4();
   var ratio = width > height ?
           1.0 * width / UHDScreenHeight : 1.0 * height / UHDScreenHeight;
-  text_size *= ratio;
+  text_size = 50 * ratio;
+  beings = new Map();
+  terminated = false;
   max_size = (255 * ratio) | 0;
-  url += session_id + "?max_size=" + max_size;
+  timer = 0;
+  url += uuidv4() + "?max_size=" + max_size;
 }
 
 function draw() {
-  if (!terminated) {
-    if (++timer >= frameRate() / 2) {
+  if (beings.size > 0) ++timer;
+  if (!terminated && (beings.size == 0 || generation > 0 || timer >= frameRate() * 3)) {
+    if (timer >= frameRate() / 2) {
       timer = 0;
       var newBeings = new Map();
       fetchBeings(url, data => {
@@ -86,7 +88,9 @@ function draw() {
     }
   }
   if (beings.size > 0) {
-    background(bg += inc);
+    if (generation > 0)
+      bg += inc;
+    background(bg);
     if (bg >= 255 || bg <= 0) {
       inc = -inc;
     }

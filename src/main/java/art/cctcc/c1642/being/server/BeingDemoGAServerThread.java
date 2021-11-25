@@ -46,6 +46,7 @@ public class BeingDemoGAServerThread {
     var elitismCount = populationSize * 30 / 100;
     ga = new BeingDemoGA(populationSize, mutationRate, crossoverRate,
             elitismCount, max_size);
+    generation = -1;
     population = ga.initPopulation();
     ga.evalPopulation(population);
   }
@@ -60,7 +61,7 @@ public class BeingDemoGAServerThread {
 
   public boolean run() {
 
-    System.out.printf("========== generation#%d ==========\n", generation++);
+    System.out.printf("========== generation#%d ==========\n", ++generation);
     population = ga.crossoverPopulation(population);
     population = ga.mutatePopulation(population);
     System.out.println();
