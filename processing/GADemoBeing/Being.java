@@ -1,10 +1,10 @@
 import java.util.Random;
 
 public class Being {
-  public static int max_ring=20;
+  public static int MAX_RING=20;
   public static Random r = new Random();
   public float size, x, y, c, dx, dy;
-  int[] delta = new int[max_ring];
+  int[] delta = new int[MAX_RING];
 
   Being(float size, float x, float y, float c) {
     this.size = size;
@@ -13,9 +13,9 @@ public class Being {
     this.c = c;
     int ring = 0;
     float current_size=this.size;
-    for (int j=0; j<max_ring-1; j++) {
+    for (int j=0; j<MAX_RING-1; j++) {
       ring++;
-      delta[j] = (int)(Math.random()*(current_size/(max_ring-ring)))+1;
+      delta[j] = (int)(Math.random()*(current_size/(MAX_RING-ring)))+1;
       current_size-=delta[j];
     }
     changeDir(0);

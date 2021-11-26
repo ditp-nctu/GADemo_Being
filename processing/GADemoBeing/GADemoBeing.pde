@@ -29,7 +29,7 @@ void draw() {
     float size=b.size;
     //float score = 0;
     int ring = 0;
-    for (int j=0; j<Being.max_ring; j++) {    
+    for (int j=0; j<Being.MAX_RING; j++) {    
       ring++;
       //System.out.printf("Ring#%d: size=%.2f ", j, size);
       //float scoreDelta = 0;      
@@ -45,7 +45,7 @@ void draw() {
       }
       //System.out.printf("scoreDelta=%.2f ", scoreDelta);
       //score+=scoreDelta;
-      //delta[j] = random(0, size/max_ring*2);
+      //delta[j] = random(0, size/MAX_RING*2);
       //delta[j] = j%2==0?size*(1-1/sqrt(2)):0;
       size-=b.delta[j];
       if (size < 0) break;

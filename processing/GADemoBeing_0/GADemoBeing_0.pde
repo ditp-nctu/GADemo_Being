@@ -22,7 +22,7 @@ void draw() {
   float size = b.size;
   int ring = 0;
 
-  for (int j=0; j<Being.max_ring; j++) {    
+  for (int j=0; j<Being.MAX_RING; j++) {    
     ring++;      
     if (j%2==0) {
       circle(0, 0, size);
