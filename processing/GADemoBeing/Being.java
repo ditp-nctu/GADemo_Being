@@ -4,7 +4,7 @@ public class Being {
   public static int max_ring=20;
   public static Random r = new Random();
   public float size, x, y, c, dx, dy;
-  double[] delta = new double[max_ring];
+  int[] delta = new int[max_ring];
 
   Being(float size, float x, float y, float c) {
     this.size = size;
@@ -13,9 +13,9 @@ public class Being {
     this.c = c;
     int ring = 0;
     float current_size=this.size;
-    for (int j=0; j<max_ring; j++) {
+    for (int j=0; j<max_ring-1; j++) {
       ring++;
-      delta[j] = (Math.random()*(current_size/(max_ring-ring)));
+      delta[j] = (int)(Math.random()*(current_size/(max_ring-ring)))+1;
       current_size-=delta[j];
     }
     changeDir(0);
@@ -37,6 +37,7 @@ public class Being {
   public void reverseDir() {
     this.dx = -this.dx;
     this.dy = -this.dy;
+    move();
   }
 
   public byte[] encode() {

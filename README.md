@@ -55,4 +55,4 @@ http://{server ip address}/p5js
 
 ### 執行畫面範例
 
-![GABeing](processing/GABeing.png "GA 應用小型範例執行畫面")
+![GABeing](GABeing.png "GA 應用小型範例執行畫面")
