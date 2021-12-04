@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+/* global windowHeight, windowWidth, CENTER, height, width, PI */
+
 var UHDScreenWidth = 3840;
 var UHDScreenHeight = 2160;
 //modify when deployed to server
 var url = "http://" + (location.host || "localhost") + ":8001/being/";
 //var url = "http://172.104.72.71:8001/being/";
-var text_size
+var text_size;
 var beings;
 var terminated;
 var max_size;
