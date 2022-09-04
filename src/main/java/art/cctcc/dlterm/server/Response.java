@@ -32,16 +32,11 @@ public class Response {
 
     var population = new JSONArray();
     for (int i = 0; i < session.getGa().getElitismCount(); i++) {
-      var being = session.getPopulation().getFittest(i);
-      var joBeing = new JSONObject()
-              .put("id", being.getId())
-              .put("color", being.getColor())
-              .put("size", being.getSize())
-              .put("ring", being.getRing())
-              .put("delta", being.getDelta())
-              .put("clockwise", being.isClockwise())
-              .put("qualified", session.getGa().qualifier.test(being));
-      population.append(joBeing);
+      var latent = session.getPopulation().getFittest(i);
+      var joLatent = new JSONObject()
+              .put("id", latent.getId())
+              .put("qualified", session.getGa().qualifier.test(latent));
+      population.append(joLatent);
     }
     this.jo = new JSONObject()
             .put("session_id", session.getSession_id())

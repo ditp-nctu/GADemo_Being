@@ -18,7 +18,7 @@ package art.cctcc.dlterm.server;
 
 import art.cctcc.dlterm.Latent;
 import art.cctcc.dlterm.DLProjectGA;
-import art.cctcc.dlterm.BeingPopulation;
+import art.cctcc.dlterm.LatentPopulation;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 import lombok.Getter;
@@ -34,16 +34,16 @@ public class DLTermGAServerThread {
   private final DLProjectGA ga;
 
   private int generation;
-  private BeingPopulation population;
+  private LatentPopulation population;
   private boolean terminated;
   private long qualifiedCount;
 
-  public DLTermGAServerThread(String session_id,
-          int populationSize, double mutationRate, double crossoverRate) {
+  public DLTermGAServerThread(String session_id, int populationSize,
+          double mutationRate, double crossoverRate, int latent_size) {
 
     this.session_id = session_id;
     var elitismCount = populationSize * 30 / 100;
-    ga = new DLProjectGA(populationSize, mutationRate, crossoverRate, elitismCount);
+    ga = new DLProjectGA(populationSize, mutationRate, crossoverRate, latent_size, elitismCount);
     generation = -1;
     population = ga.initPopulation();
     ga.evalPopulation(population);
@@ -66,7 +66,7 @@ public class DLTermGAServerThread {
     ga.evalPopulation(population);
     IntStream.range(0, ga.getElitismCount())
             .mapToObj(population::getFittest)
-            .sorted(Comparator.comparing(Latent::getSize))
+//            .sorted(Comparator.comparing(Latent::getSize))
             .map(Latent::getInfo)
             .forEach(System.out::println);
     this.qualifiedCount = ga.getQualifiedCount(population);

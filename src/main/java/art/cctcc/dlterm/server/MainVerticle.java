@@ -23,9 +23,11 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -40,8 +42,10 @@ public class MainVerticle extends AbstractVerticle {
     router.route().handler(CorsHandler.create("*")
             .allowedMethod(io.vertx.core.http.HttpMethod.GET)
             .allowedHeader("Access-Control-Allow-Headers")
-            .allowedHeader("Content-Type"));
+            .allowedHeader("Content-Type")
+    );
     router.post("/dl/:session_id")
+            .handler(BodyHandler.create())
             .handler(this::_DLGA);
     vertx.createHttpServer()
             .requestHandler(router)
@@ -54,20 +58,27 @@ public class MainVerticle extends AbstractVerticle {
     var msg = "ok";
     var session_id = ctx.pathParam("session_id");
     System.out.println("Accepting request: session_id=" + session_id);
-    
+
     //var queryParams = ctx.queryParams();
-    DLTermGAServerThread thread = sessions.containsKey(session_id)
-            ? sessions.get(session_id)
-            : new DLTermGAServerThread(session_id, DefaultPopulationSize,
-                    DefaultMutationRate, DefaultCrossoverRate);
-    
-    if (!sessions.containsKey(session_id))
-      sessions.put(session_id, thread);
-    else {
-        var content = ctx.getBodyAsJson();
-        //TODO: process incoming data
+    var thread = sessions.get(session_id);
+    try {
+      var content = ctx.getBodyAsJson();
+      System.out.println(content.fieldNames());
+      if (Objects.isNull(thread)) {
+        System.out.println("Creating new GA session.");
+        var latent_size = content.getInteger("latent_size");
+        var population_size = content.getInteger("population_size", DefaultPopulationSize);
+        var mutation_rate = content.getDouble("mutation_rate", DefaultMutationRate);
+        var crossover_rate = content.getDouble("crossover_rate", DefaultCrossoverRate);
+        thread = new DLTermGAServerThread(session_id, population_size,
+                mutation_rate, crossover_rate, latent_size);
+        sessions.put(session_id, thread);
+      } else {
+        var eval = content.getJsonArray("eval");
+      }
+    } catch (Exception ex) {
+      msg = ex.getMessage();
     }
-    
     var response = thread.getResponse(ctx.request().query(), msg);
     logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
     ctx.response()

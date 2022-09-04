@@ -25,53 +25,28 @@ import java.util.stream.Stream;
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
+public class DLProjectGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
-  final float screenWidth;
-  final float screenHeight;
   public final Predicate<Latent> qualifier;
   private int chromosome_size;
 
   public DLProjectGA(int populationSize, double mutationRate, double crossoverRate,
-          int elitismCount, float width, float height) {
+          int latent_size, int elitismCount) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
-    this.screenWidth = width;
-    this.screenHeight = height;
-    this.qualifier = being -> being.getRing() > DefaultMinRing / DefaultMaxSize; //TODO
-  }
-
-  public DLProjectGA(int populationSize, double mutationRate, double crossoverRate,
-          int elitismCount) {
-
-    super(populationSize, mutationRate, crossoverRate, elitismCount);
-    this.screenWidth = BrowserScreenWidth;
-    this.screenHeight = BrowserScreenHeight;
-    this.qualifier = being -> being.getRing() > DefaultMinRing / DefaultMaxSize; //TODO
-  }
-
-  public DLProjectGA(int populationSize, double mutationRate, double crossoverRate,
-          int elitismCount, int max_size) {
-
-    super(populationSize, mutationRate, crossoverRate, elitismCount);
-    this.screenWidth = BrowserScreenWidth;
-    this.screenHeight = BrowserScreenHeight;
-    this.qualifier = being -> being.getRing() > DefaultMinRing / DefaultMaxSize; //TODO
+    this.chromosome_size = latent_size;
+    this.qualifier = latent -> true; //TODO
   }
 
   @Override
-  public BeingPopulation initPopulation() {
+  public LatentPopulation initPopulation() {
     // Initialize population
-    var population = new BeingPopulation(this.populationSize);
+    var population = new LatentPopulation(this.populationSize);
 
     for (int individualCount = 0; individualCount < this.populationSize; individualCount++) {
       var individual = Stream.generate(() -> new Latent(this.chromosome_size))
               .findAny()
               .get();
-      var size = individual.getSize();
-      individual.setX(r.nextInt((int) screenWidth - size) + size / 2);
-      individual.setY(r.nextInt((int) screenHeight - size) + size / 2);
-      individual.setColor(r.nextInt(256));
       individual.encodeGenes();
       population.setIndividual(individualCount, individual);
     }
@@ -79,12 +54,12 @@ public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
   }
 
   @Override
-  public boolean isTerminationConditionMet(BeingPopulation population) {
+  public boolean isTerminationConditionMet(LatentPopulation population) {
 
     return getQualifiedCount(population) == elitismCount;
   }
 
-  public long getQualifiedCount(BeingPopulation population) {
+  public long getQualifiedCount(LatentPopulation population) {
 
     return IntStream.range(0, elitismCount)
             .mapToObj(i -> population.getFittest(i))
@@ -92,7 +67,7 @@ public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
             .count();
   }
 
-  public double getElitismFitnessAverage(BeingPopulation population) {
+  public double getElitismFitnessAverage(LatentPopulation population) {
 
     return IntStream.range(0, elitismCount)
             .mapToObj(population::getFittest)
@@ -103,28 +78,16 @@ public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
   @Override
   public double calcFitness(Latent being) {
 
-    var deltaScoreBase = 0.0;
-    var currentSize = being.getSize() - being.getDelta()[0];
-    for (int i = 1; i < being.getRing() - 1; i++) {
-      deltaScoreBase += (i % 2 == 0)
-              ? being.getDelta()[i - 1]
-              : Math.abs(being.getDelta()[i - 1] - currentSize * (Math.sqrt(2.0) - 1));
-      currentSize -= being.getDelta()[i];
-    }
-    var deltaScore = (being.getRing() == 1) ? 0.0
-            : (1.0 / (deltaScoreBase / (being.getRing() - 1) + 1.0));
-    var ringScore = 1.0 * being.getRing() / DefaultMaxRing;
-    var fitness = being.getSize() > this.chromosome_size ? 0
-            : (deltaScore * 1.0 + ringScore * 9.0) / 10;
+    var fitness = 0; //TODO
     being.setFitness(fitness);
     return fitness;
   }
 
   @Override
-  public BeingPopulation crossoverPopulation(BeingPopulation population) {
+  public LatentPopulation crossoverPopulation(LatentPopulation population) {
 
     var crossoverCounter = 0;
-    var newPopulation = new BeingPopulation(this.populationSize);
+    var newPopulation = new LatentPopulation(this.populationSize);
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var parent1 = population.getFittest(populationIndex);
       if (populationIndex < this.elitismCount || this.crossoverRate < r.nextDouble()) {
@@ -145,14 +108,10 @@ public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
           offspring.setGene(geneIndex, (usingFirst ? parent1 : parent2).getGene(geneIndex));
         }
         offspring.decodeGenes();
-        if (population.containsSameSize(offspring)) {
-          newPopulation.setIndividual(populationIndex, parent1);
-        } else {
-          newPopulation.setIndividual(populationIndex, offspring);
-          crossoverCounter++;
-          calcFitness(offspring);
-          System.out.printf("X %s\n", offspring.getInfo());
-        }
+        newPopulation.setIndividual(populationIndex, offspring);
+        crossoverCounter++;
+        calcFitness(offspring);
+        System.out.printf("X %s\n", offspring.getInfo());
       }
     }
     System.out.print(" crossoverCounter=" + crossoverCounter);
@@ -160,16 +119,16 @@ public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
   }
 
   @Override
-  public BeingPopulation mutatePopulation(BeingPopulation population) {
+  public LatentPopulation mutatePopulation(LatentPopulation population) {
 
     var mutationCounter = 0;
-    var newPopulation = new BeingPopulation(this.populationSize);
+    var newPopulation = new LatentPopulation(this.populationSize);
     for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
       var being = population.getFittest(populationIndex);
       if (populationIndex < this.elitismCount || this.mutationRate < r.nextDouble()) {
         newPopulation.setIndividual(populationIndex, being);
       } else {
-        var newBeing = new Latent(being);
+        var newLatent = new Latent(being);
         var mutation = r.nextInt(DefaultChromosomeLength / 10) + 1;
         var mutationCites = Stream.generate(() -> r.nextInt(being.getChromosomeLength()))
                 .distinct()
@@ -178,21 +137,16 @@ public class DLProjectGA extends GeneticAlgorithm<BeingPopulation, Latent> {
         for (int geneIndex = 0; geneIndex < being.getChromosomeLength(); geneIndex++) {
           if (mutationCites.contains(geneIndex)) {
             int newGene = (being.getGene(geneIndex) == 1) ? 0 : 1;
-            newBeing.setGene(geneIndex, newGene);
+            newLatent.setGene(geneIndex, newGene);
           } else {
-            newBeing.setGene(geneIndex, being.getGene(geneIndex));
+            newLatent.setGene(geneIndex, being.getGene(geneIndex));
           }
         }
-        newBeing.decodeGenes();
-        if (population.containsSameSize(newBeing)) {
-          newPopulation.setIndividual(populationIndex, being);
-        } else {
-          newBeing.setColor(r.nextInt(256));
-          newPopulation.setIndividual(populationIndex, newBeing);
-          mutationCounter++;
-          calcFitness(newBeing);
-          System.out.printf("\n! %s", newBeing.getInfo());
-        }
+        newLatent.decodeGenes();
+        newPopulation.setIndividual(populationIndex, newLatent);
+        mutationCounter++;
+        calcFitness(newLatent);
+        System.out.printf("\n! %s", newLatent.getInfo());
       }
     }
     System.out.print((mutationCounter > 0) ? "\n" : "");

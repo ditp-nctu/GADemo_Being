@@ -23,24 +23,10 @@ import java.util.stream.IntStream;
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class BeingPopulation extends Population<Latent> {
+public class LatentPopulation extends Population<Latent> {
 
-  public BeingPopulation(int populationSize) {
+  public LatentPopulation(int populationSize) {
 
     this.population = new Latent[populationSize];
-  }
-
-  public boolean containsSameSize(Latent being) {
-
-    return containsSameSize(being, this.population.length);
-  }
-
-  public boolean containsSameSize(Latent being, int elitismCount) {
-
-    return IntStream.range(0, elitismCount)
-            .mapToObj(this::getFittest)
-            .filter(Objects::nonNull)
-            .map(Latent::getSize)
-            .anyMatch(size -> size == being.getSize());
   }
 }
