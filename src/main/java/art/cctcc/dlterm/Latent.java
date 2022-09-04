@@ -2,7 +2,9 @@ package art.cctcc.dlterm;
 
 import art.cctcc.c1642.being.ex.UnexpectedGeneticCode;
 import ga.chapter2.Individual;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -14,13 +16,15 @@ import lombok.Setter;
 @Setter
 public class Latent extends Individual {
 
-  static final int CODE_LEN = 62;
+  static final int CODE_LEN = 64;
   private final UUID id;
 
   public Latent(UUID id, int chromosomeLength) {
 
     super(new int[chromosomeLength]);
     this.id = id;
+
+    assert chromosomeLength % CODE_LEN == 0;
   }
 
   /**
@@ -36,16 +40,25 @@ public class Latent extends Individual {
             .forEach(i -> this.setGene(i, source.getGene(i)));
   }
 
-  public Latent(int chromosomeLength) {
+  public Latent(int latent_size) {
 
-    super(chromosomeLength);
+    super(latent_size * CODE_LEN);
     this.id = UUID.randomUUID();
+  }
+
+  public int getLatentLength() {
+
+    return this.getChromosomeLength() / CODE_LEN;
   }
 
   public void encodeGenes(double... latent_code) {
 
+    assert latent_code.length == this.getLatentLength();
     var chromosome = Arrays.stream(latent_code)
-            .mapToObj(code -> Long.toBinaryString(Double.doubleToLongBits(code)))
+            .mapToLong(Double::doubleToRawLongBits)
+            .mapToObj(Long::toBinaryString)
+            .map(BigInteger::new)
+            .map(s -> String.format("%0" + CODE_LEN + "d", s))
             .collect(Collectors.joining());
     for (var i = 0; i < this.getChromosomeLength(); i++) {
       switch (chromosome.toCharArray()[i]) {
@@ -58,12 +71,13 @@ public class Latent extends Individual {
 
   public double[] decodeGenes() {
 
-    return IntStream.range(0, this.getChromosomeLength() / CODE_LEN)
+    return IntStream.range(0, this.getLatentLength())
             .mapToObj(i -> IntStream.range(i * CODE_LEN, (i + 1) * CODE_LEN).mapToObj(j -> String.valueOf(this.getGene(j))).collect(Collectors.joining()))
-            .mapToDouble(s -> Double.longBitsToDouble(Long.parseLong(s, 2)))
+            .mapToDouble(s -> Double.longBitsToDouble(Long.parseUnsignedLong(s, 2)))
             .toArray();
   }
 
+  //TODO
   public String getInfo() {
 
     var info = String.format("%6.3f", this.getFitness() * 100);

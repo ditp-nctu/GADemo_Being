@@ -17,7 +17,9 @@ package art.cctcc.dlterm;
 
 import static art.cctcc.c1642.being.Constants.*;
 import ga.chapter2.GeneticAlgorithm;
+import java.util.Random;
 import java.util.function.Predicate;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -28,13 +30,13 @@ import java.util.stream.Stream;
 public class DLProjectGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
   public final Predicate<Latent> qualifier;
-  private int chromosomeLength;
+  private int latent_size;
 
   public DLProjectGA(int populationSize, double mutationRate, double crossoverRate,
           int latent_size, int elitismCount) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
-    this.chromosomeLength = latent_size;
+    this.latent_size = latent_size;
     this.qualifier = latent -> true; //TODO
   }
 
@@ -43,11 +45,16 @@ public class DLProjectGA extends GeneticAlgorithm<LatentPopulation, Latent> {
     // Initialize population
     var population = new LatentPopulation(this.populationSize);
 
+    var rand = new Random();
     for (int individualCount = 0; individualCount < this.populationSize; individualCount++) {
-      var individual = Stream.generate(() -> new Latent(this.chromosomeLength))
+      var individual = Stream.generate(() -> new Latent(this.latent_size))
               .findAny()
               .get();
-//      individual.encodeGenes();
+
+      var latent_code = DoubleStream.generate(rand::nextGaussian)
+              .limit(individual.getLatentLength())
+              .toArray();
+      individual.encodeGenes(latent_code);
       population.setIndividual(individualCount, individual);
     }
     return population;

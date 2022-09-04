@@ -15,8 +15,9 @@
  */
 package art.cctcc.dlterm;
 
-import static art.cctcc.dlterm.Latent.CODE_LEN;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.DoubleStream;
 import org.junit.jupiter.api.*;
@@ -27,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
 public class LatentTest {
+
+  static Random RAND = new Random();
 
   public LatentTest() {
   }
@@ -50,14 +53,16 @@ public class LatentTest {
   /**
    * Test of encodeGenes method, of class Latent.
    */
-  @Test @Disabled
+  @Test
   public void testEncodeGenes() {
     System.out.println("encodeGenes");
-    double[] latent_code = null;
-    Latent instance = null;
+    Latent instance = new Latent(10);
+    double[] latent_code = DoubleStream.generate(RAND::nextGaussian)
+            .limit(instance.getLatentLength())
+            .toArray();
     instance.encodeGenes(latent_code);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    double[] result = instance.decodeGenes();
+    assertArrayEquals(latent_code, result);
   }
 
   /**
@@ -66,12 +71,14 @@ public class LatentTest {
   @Test
   public void testDecodeGenes() {
     System.out.println("decodeGenes");
-    Latent instance = new Latent(CODE_LEN * 10);
-    double[] expResult = DoubleStream.generate(Math::random).limit(10).toArray();
+    Latent instance = new Latent(10);
+    double[] expResult = DoubleStream.generate(Math::random)
+            .limit(instance.getLatentLength())
+            .map(s -> s * 1000)
+            .toArray();
     instance.encodeGenes(expResult);
     double[] result = instance.decodeGenes();
     assertArrayEquals(expResult, result);
-    System.out.println(instance.getInfo());
   }
 
   /**
@@ -102,4 +109,15 @@ public class LatentTest {
     fail("The test case is a prototype.");
   }
 
+  /**
+   * Test of getLatentLength method, of class Latent.
+   */
+  @Test
+  public void testGetLatentLength() {
+    System.out.println("getLatentLength");
+    Latent instance = new Latent(10);
+    int expResult = 10;
+    int result = instance.getLatentLength();
+    assertEquals(expResult, result);
+  }
 }
