@@ -28,13 +28,13 @@ import java.util.stream.Stream;
 public class DLProjectGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
   public final Predicate<Latent> qualifier;
-  private int chromosome_size;
+  private int chromosomeLength;
 
   public DLProjectGA(int populationSize, double mutationRate, double crossoverRate,
           int latent_size, int elitismCount) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
-    this.chromosome_size = latent_size;
+    this.chromosomeLength = latent_size;
     this.qualifier = latent -> true; //TODO
   }
 
@@ -44,10 +44,10 @@ public class DLProjectGA extends GeneticAlgorithm<LatentPopulation, Latent> {
     var population = new LatentPopulation(this.populationSize);
 
     for (int individualCount = 0; individualCount < this.populationSize; individualCount++) {
-      var individual = Stream.generate(() -> new Latent(this.chromosome_size))
+      var individual = Stream.generate(() -> new Latent(this.chromosomeLength))
               .findAny()
               .get();
-      individual.encodeGenes();
+//      individual.encodeGenes();
       population.setIndividual(individualCount, individual);
     }
     return population;

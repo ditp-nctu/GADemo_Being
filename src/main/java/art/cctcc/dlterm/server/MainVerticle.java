@@ -67,17 +67,24 @@ public class MainVerticle extends AbstractVerticle {
       if (Objects.isNull(thread)) {
         System.out.println("Creating new GA session.");
         var latent_size = content.getInteger("latent_size");
+        System.out.println("latent_size = " + latent_size);
         var population_size = content.getInteger("population_size", DefaultPopulationSize);
+        System.out.println("population_size = " + population_size);
         var mutation_rate = content.getDouble("mutation_rate", DefaultMutationRate);
+        System.out.println("mutation_rate = " + mutation_rate);
         var crossover_rate = content.getDouble("crossover_rate", DefaultCrossoverRate);
+        System.out.println("crossover_rate = " + crossover_rate);
         thread = new DLTermGAServerThread(session_id, population_size,
                 mutation_rate, crossover_rate, latent_size);
         sessions.put(session_id, thread);
       } else {
         var eval = content.getJsonArray("eval");
+        System.out.println("eval = " + eval);
       }
     } catch (Exception ex) {
       msg = ex.getMessage();
+      ex.printStackTrace();
+      System.out.println("Exception: " + msg);
     }
     var response = thread.getResponse(ctx.request().query(), msg);
     logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
