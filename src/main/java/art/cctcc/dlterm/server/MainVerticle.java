@@ -15,12 +15,13 @@
  */
 package art.cctcc.dlterm.server;
 
-import art.cctcc.c1642.being.Constants;
 import static art.cctcc.c1642.being.Constants.*;
+import art.cctcc.c1642.being.ex.InvalidEvalSizeException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -61,32 +62,39 @@ public class MainVerticle extends AbstractVerticle {
 
     //var queryParams = ctx.queryParams();
     var thread = sessions.get(session_id);
+    JsonArray eval = null;
     try {
       var content = ctx.getBodyAsJson();
       System.out.println(content.fieldNames());
       if (Objects.isNull(thread)) {
-        System.out.println("Creating new GA session.");
         var latent_size = content.getInteger("latent_size");
-        System.out.println("latent_size = " + latent_size);
         var population_size = content.getInteger("population_size", DefaultPopulationSize);
-        System.out.println("population_size = " + population_size);
         var mutation_rate = content.getDouble("mutation_rate", DefaultMutationRate);
-        System.out.println("mutation_rate = " + mutation_rate);
         var crossover_rate = content.getDouble("crossover_rate", DefaultCrossoverRate);
+        var elitism_count = content.getInteger("elitism_count",
+                population_size * 30 / 100);
+
+        System.out.println("Creating new GA session.");
+        System.out.println("latent_size = " + latent_size);
+        System.out.println("population_size = " + population_size);
+        System.out.println("mutation_rate = " + mutation_rate);
         System.out.println("crossover_rate = " + crossover_rate);
+        System.out.println("elitism_count = " + elitism_count);
+
         thread = new DLTermGAServerThread(session_id, population_size,
-                mutation_rate, crossover_rate, latent_size);
+                mutation_rate, crossover_rate, latent_size, elitism_count);
         sessions.put(session_id, thread);
       } else {
-        var eval = content.getJsonArray("eval");
-        System.out.println("eval = " + eval);
+        eval = content.getJsonArray("eval", null);
+        if (Objects.nonNull(eval) && eval.size() != thread.getPopulation().size())
+          throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
       }
     } catch (Exception ex) {
       msg = ex.getMessage();
       ex.printStackTrace();
       System.out.println("Exception: " + msg);
     }
-    var response = thread.getResponse(ctx.request().query(), msg);
+    var response = thread.getResponse(ctx.request().query(), msg, eval);
     logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
     ctx.response()
             .putHeader("content-type", "application/json")

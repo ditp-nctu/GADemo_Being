@@ -15,7 +15,6 @@
  */
 package art.cctcc.dlterm.server;
 
-import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -25,7 +24,6 @@ import processing.data.JSONObject;
  */
 public class Response {
 
-  static PApplet p = new PApplet();
   public final JSONObject jo;
 
   public Response(DLTermGAServerThread session, String query, String msg) {

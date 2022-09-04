@@ -27,12 +27,12 @@ import java.util.stream.Stream;
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class DLProjectGA extends GeneticAlgorithm<LatentPopulation, Latent> {
+public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
   public final Predicate<Latent> qualifier;
   private int latent_size;
 
-  public DLProjectGA(int populationSize, double mutationRate, double crossoverRate,
+  public DLTermGA(int populationSize, double mutationRate, double crossoverRate,
           int latent_size, int elitismCount) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);

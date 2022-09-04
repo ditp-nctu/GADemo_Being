@@ -17,9 +17,11 @@
 package art.cctcc.dlterm.server;
 
 import art.cctcc.dlterm.Latent;
-import art.cctcc.dlterm.DLProjectGA;
+import art.cctcc.dlterm.DLTermGA;
 import art.cctcc.dlterm.LatentPopulation;
+import io.vertx.core.json.JsonArray;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import lombok.Getter;
 
@@ -31,7 +33,7 @@ import lombok.Getter;
 public class DLTermGAServerThread {
 
   private final String session_id;
-  private final DLProjectGA ga;
+  private final DLTermGA ga;
 
   private int generation;
   private LatentPopulation population;
@@ -39,25 +41,26 @@ public class DLTermGAServerThread {
   private long qualifiedCount;
 
   public DLTermGAServerThread(String session_id, int populationSize,
-          double mutationRate, double crossoverRate, int latent_size) {
+          double mutationRate, double crossoverRate,
+          int latent_size, int elitismCount) {
 
     this.session_id = session_id;
-    var elitismCount = populationSize * 30 / 100;
-    ga = new DLProjectGA(populationSize, mutationRate, crossoverRate, latent_size, elitismCount);
+    ga = new DLTermGA(populationSize, mutationRate, crossoverRate,
+            latent_size, elitismCount);
     generation = -1;
     population = ga.initPopulation();
     ga.evalPopulation(population);
   }
 
-  public Response getResponse(String query, String msg) {
+  public Response getResponse(String query, String msg, JsonArray eval) {
 
-    if (!this.terminated) {
-      this.terminated = this.run();
+    if (!this.terminated && Objects.nonNull(eval)) {
+      this.terminated = this.run(eval);
     }
     return new Response(this, query, msg);
   }
 
-  public boolean run() {
+  public boolean run(JsonArray eval) {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
     population = ga.crossoverPopulation(population);
@@ -66,7 +69,7 @@ public class DLTermGAServerThread {
     ga.evalPopulation(population);
     IntStream.range(0, ga.getElitismCount())
             .mapToObj(population::getFittest)
-//            .sorted(Comparator.comparing(Latent::getSize))
+            //.sorted(Comparator.comparing(Latent::getSize))
             .map(Latent::getInfo)
             .forEach(System.out::println);
     this.qualifiedCount = ga.getQualifiedCount(population);
