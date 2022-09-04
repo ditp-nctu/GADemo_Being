@@ -16,9 +16,9 @@
  */
 package art.cctcc.dlterm.server;
 
-import art.cctcc.c1642.being.Being;
-import art.cctcc.c1642.being.BeingDemoGA;
-import art.cctcc.c1642.being.BeingPopulation;
+import art.cctcc.dlterm.Latent;
+import art.cctcc.dlterm.DLProjectGA;
+import art.cctcc.dlterm.BeingPopulation;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 import lombok.Getter;
@@ -31,7 +31,7 @@ import lombok.Getter;
 public class DLTermGAServerThread {
 
   private final String session_id;
-  private final BeingDemoGA ga;
+  private final DLProjectGA ga;
 
   private int generation;
   private BeingPopulation population;
@@ -39,13 +39,11 @@ public class DLTermGAServerThread {
   private long qualifiedCount;
 
   public DLTermGAServerThread(String session_id,
-          int populationSize, double mutationRate, double crossoverRate,
-          int max_size) {
+          int populationSize, double mutationRate, double crossoverRate) {
 
     this.session_id = session_id;
     var elitismCount = populationSize * 30 / 100;
-    ga = new BeingDemoGA(populationSize, mutationRate, crossoverRate,
-            elitismCount, max_size);
+    ga = new DLProjectGA(populationSize, mutationRate, crossoverRate, elitismCount);
     generation = -1;
     population = ga.initPopulation();
     ga.evalPopulation(population);
@@ -68,8 +66,8 @@ public class DLTermGAServerThread {
     ga.evalPopulation(population);
     IntStream.range(0, ga.getElitismCount())
             .mapToObj(population::getFittest)
-            .sorted(Comparator.comparing(Being::getSize))
-            .map(Being::getInfo)
+            .sorted(Comparator.comparing(Latent::getSize))
+            .map(Latent::getInfo)
             .forEach(System.out::println);
     this.qualifiedCount = ga.getQualifiedCount(population);
     System.out.printf(" Elitism population: %d/%d/%d)\n",

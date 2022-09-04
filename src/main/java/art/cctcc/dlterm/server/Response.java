@@ -40,7 +40,7 @@ public class Response {
               .put("ring", being.getRing())
               .put("delta", being.getDelta())
               .put("clockwise", being.isClockwise())
-              .put("qualified", session.getGa().beingQualifier.test(being));
+              .put("qualified", session.getGa().qualifier.test(being));
       population.append(joBeing);
     }
     this.jo = new JSONObject()

@@ -41,31 +41,33 @@ public class MainVerticle extends AbstractVerticle {
             .allowedMethod(io.vertx.core.http.HttpMethod.GET)
             .allowedHeader("Access-Control-Allow-Headers")
             .allowedHeader("Content-Type"));
-    router.get("/being/:session_id")
-            .handler(this::_beingGA);
+    router.post("/dl/:session_id")
+            .handler(this::_DLGA);
     vertx.createHttpServer()
             .requestHandler(router)
             .listen(port);
     logger.log(Level.INFO, " Server started on port {0}", port);
   }
 
-  public void _beingGA(RoutingContext ctx) {
+  public void _DLGA(RoutingContext ctx) {
 
     var msg = "ok";
     var session_id = ctx.pathParam("session_id");
     System.out.println("Accepting request: session_id=" + session_id);
-    var queryParams = ctx.queryParams();
-    var max_size = queryParams.contains("max_size")
-            ? Integer.parseInt(queryParams.get("max_size"))
-            : Constants.DefaultMaxSize;
-    DLTermGAServerThread thread = null;
-    if (sessions.containsKey(session_id)) {
-      thread = sessions.get(session_id);
-    } else {
-      thread = new DLTermGAServerThread(session_id, DefaultPopulationSize,
-              DefaultMutationRate, DefaultCrossoverRate, max_size);
+    
+    //var queryParams = ctx.queryParams();
+    DLTermGAServerThread thread = sessions.containsKey(session_id)
+            ? sessions.get(session_id)
+            : new DLTermGAServerThread(session_id, DefaultPopulationSize,
+                    DefaultMutationRate, DefaultCrossoverRate);
+    
+    if (!sessions.containsKey(session_id))
       sessions.put(session_id, thread);
+    else {
+        var content = ctx.getBodyAsJson();
+        //TODO: process incoming data
     }
+    
     var response = thread.getResponse(ctx.request().query(), msg);
     logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
     ctx.response()
