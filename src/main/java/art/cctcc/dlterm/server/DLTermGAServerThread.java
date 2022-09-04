@@ -20,7 +20,6 @@ import art.cctcc.dlterm.Latent;
 import art.cctcc.dlterm.DLTermGA;
 import art.cctcc.dlterm.LatentPopulation;
 import io.vertx.core.json.JsonArray;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import lombok.Getter;
@@ -47,20 +46,24 @@ public class DLTermGAServerThread {
     this.session_id = session_id;
     ga = new DLTermGA(populationSize, mutationRate, crossoverRate,
             latent_size, elitismCount);
-    generation = -1;
+    generation = 0;
     population = ga.initPopulation();
     ga.evalPopulation(population);
   }
 
   public Response getResponse(String query, String msg, JsonArray eval) {
 
-    if (!this.terminated && Objects.nonNull(eval)) {
-      this.terminated = this.run(eval);
+    if (!this.terminated && Objects.nonNull(eval)
+            && this.ga.getPopulationSize() == eval.size()) {
+      for (int i = 0; i < eval.size(); i++) {
+        this.population.getIndividual(i).setFitness(eval.getDouble(i));
+      }
+      this.terminated = this.run();
     }
     return new Response(this, query, msg);
   }
 
-  public boolean run(JsonArray eval) {
+  public boolean run() {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
     population = ga.crossoverPopulation(population);

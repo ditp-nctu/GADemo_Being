@@ -17,6 +17,7 @@ import lombok.Setter;
 public class Latent extends Individual {
 
   static final int CODE_LEN = 64;
+
   private final UUID id;
 
   public Latent(UUID id, int chromosomeLength) {
@@ -77,10 +78,18 @@ public class Latent extends Individual {
             .toArray();
   }
 
-  //TODO
+  public String getChromosomeCompact() {
+
+    return IntStream.range(0, this.getChromosomeLength() / 4)
+            .mapToObj(i -> IntStream.range(i * 4, (i + 1) * 4).mapToObj(j -> String.valueOf(this.getGene(j))).collect(Collectors.joining()))
+            .mapToLong(s -> Long.parseUnsignedLong(s, 2))
+            .mapToObj(Long::toHexString)
+            .collect(Collectors.joining());
+  }
+
   public String getInfo() {
 
-    var info = String.format("%6.3f", this.getFitness() * 100);
+    var info = this.getChromosomeCompact();
     return info;
   }
 }

@@ -15,6 +15,7 @@
  */
 package art.cctcc.dlterm.server;
 
+import java.util.Arrays;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -29,10 +30,12 @@ public class Response {
   public Response(DLTermGAServerThread session, String query, String msg) {
 
     var population = new JSONArray();
-    for (int i = 0; i < session.getGa().getElitismCount(); i++) {
+//    for (int i = 0; i < session.getGa().getElitismCount(); i++) {
+    for (int i = 0; i < session.getGa().getPopulationSize(); i++) {
       var latent = session.getPopulation().getFittest(i);
       var joLatent = new JSONObject()
               .put("id", latent.getId())
+              .put("code", latent.decodeGenes())
               .put("qualified", session.getGa().qualifier.test(latent));
       population.append(joLatent);
     }

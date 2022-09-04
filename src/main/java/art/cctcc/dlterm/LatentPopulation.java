@@ -16,8 +16,6 @@
 package art.cctcc.dlterm;
 
 import ga.chapter2.Population;
-import java.util.Objects;
-import java.util.stream.IntStream;
 
 /**
  *

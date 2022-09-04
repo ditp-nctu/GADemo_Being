@@ -30,14 +30,14 @@ import java.util.stream.Stream;
 public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
   public final Predicate<Latent> qualifier;
-  private int latent_size;
+  private final int latent_size;
 
   public DLTermGA(int populationSize, double mutationRate, double crossoverRate,
           int latent_size, int elitismCount) {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
     this.latent_size = latent_size;
-    this.qualifier = latent -> true; //TODO
+    this.qualifier = latent -> false; //TODO
   }
 
   @Override
@@ -83,14 +83,6 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
   }
 
   @Override
-  public double calcFitness(Latent being) {
-
-    var fitness = 0; //TODO
-    being.setFitness(fitness);
-    return fitness;
-  }
-
-  @Override
   public LatentPopulation crossoverPopulation(LatentPopulation population) {
 
     var crossoverCounter = 0;
@@ -117,7 +109,7 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
         offspring.decodeGenes();
         newPopulation.setIndividual(populationIndex, offspring);
         crossoverCounter++;
-        calcFitness(offspring);
+//        calcFitness(offspring);
         System.out.printf("X %s\n", offspring.getInfo());
       }
     }
@@ -152,12 +144,18 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
         newLatent.decodeGenes();
         newPopulation.setIndividual(populationIndex, newLatent);
         mutationCounter++;
-        calcFitness(newLatent);
+//        calcFitness(newLatent);
         System.out.printf("\n! %s", newLatent.getInfo());
       }
     }
     System.out.print((mutationCounter > 0) ? "\n" : "");
     System.out.print(" mutationCounter=" + mutationCounter);
     return newPopulation;
+  }
+
+  @Override
+  public double calcFitness(Latent individual) {
+
+    return individual.getFitness();
   }
 }
