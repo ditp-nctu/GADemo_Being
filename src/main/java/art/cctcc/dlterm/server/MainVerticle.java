@@ -86,7 +86,7 @@ public class MainVerticle extends AbstractVerticle {
       } else {
         eval = content.getJsonArray("eval", null);
         if (Objects.nonNull(eval)) {
-          if (eval.size() != thread.getGa().getPopulationSize())
+          if (eval.size() < thread.getGa().getPopulationSize())
             throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
           System.out.println("Eval size = " + eval.size());
         }
