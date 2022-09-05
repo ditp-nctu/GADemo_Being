@@ -66,7 +66,7 @@ public class DLTermGAServerThread {
     }
     ga.evalPopulation(population);
     this.population = ga.crossoverPopulation(this.population);
-//    this.population = ga.mutatePopulation(this.population);
+    this.population = ga.mutatePopulation(this.population);
     return ga.isTerminationConditionMet(population);
   }
 }
