@@ -47,7 +47,7 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
                     .get();
 
             var latent_code = DoubleStream.generate(r::nextGaussian)
-                    .limit(individual.getChromosomeLength())
+                    .limit(chromosomeLength)
                     .toArray();
             individual.encodeGenes(latent_code);
             population.setIndividual(individualCount, individual);
@@ -71,22 +71,19 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
             if (populationIndex < this.elitismCount || this.crossoverRate < r.nextDouble()) {
                 newPopulation.setIndividual(populationIndex, parent1);
             } else {
-                var offspring = new Latent(parent1);
+                var offspring = new Latent(chromosomeLength);
                 var parent2 = selectParent(population);
-                var crossover = r.nextInt(parent1.getChromosomeLength() / 20) + 1;
-                var crossoverCites = Stream.generate(() -> r.nextInt(parent1.getChromosomeLength()))
+                var crossover = r.nextInt(chromosomeLength / 20) + 1;
+                var crossoverCites = Stream.generate(() -> r.nextInt(chromosomeLength))
                         .distinct()
                         .limit(crossover)
                         .toList();
                 var usingFirst = true;
-                for (var geneIndex = 0; geneIndex < parent1.getChromosomeLength(); geneIndex++) {
+                for (var geneIndex = 0; geneIndex < chromosomeLength; geneIndex++) {
                     if (crossoverCites.contains(geneIndex)) {
                         usingFirst = !usingFirst;
                     }
                     offspring.setGene(geneIndex, (usingFirst ? parent1 : parent2).getGene(geneIndex));
-                }
-                if (Arrays.toString(offspring.decodeGenes()).contains("NaN")) {
-                    System.out.println("NaN Warning.");
                 }
                 newPopulation.setIndividual(populationIndex, offspring);
                 crossoverCounter++;
@@ -107,13 +104,13 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
             if (populationIndex < this.elitismCount || this.mutationRate < r.nextDouble()) {
                 newPopulation.setIndividual(populationIndex, latent);
             } else {
-                var newLatent = new Latent(latent);
-                var mutation = r.nextInt(latent.getChromosomeLength() / 10) + 1;
-                var mutationCites = Stream.generate(() -> r.nextInt(latent.getChromosomeLength()))
+                var newLatent = new Latent(chromosomeLength);
+                var mutation = r.nextInt(chromosomeLength / 10) + 1;
+                var mutationCites = Stream.generate(() -> r.nextInt(chromosomeLength))
                         .distinct()
                         .limit(mutation)
                         .toList();
-                for (int geneIndex = 0; geneIndex < latent.getChromosomeLength(); geneIndex++) {
+                for (int geneIndex = 0; geneIndex < chromosomeLength; geneIndex++) {
                     if (mutationCites.contains(geneIndex)) {
                         double newGene = latent.getGene(geneIndex) + r.nextGaussian();
                         newLatent.setGene(geneIndex, newGene);

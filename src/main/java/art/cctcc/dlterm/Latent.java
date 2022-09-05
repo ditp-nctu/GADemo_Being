@@ -21,18 +21,18 @@ public class Latent extends Individual {
     this.id = id;
   }
 
-  /**
-   * Constructor for duplicate the source individual.
-   *
-   * @param source
-   */
-  public Latent(Latent source) {
-
-    super(source.getChromosomeLength());
-    this.id = UUID.randomUUID();
-    IntStream.range(0, this.getChromosomeLength())
-            .forEach(i -> this.setGene(i, source.getGene(i)));
-  }
+//  /**
+//   * Constructor for duplicate the source individual.
+//   *
+//   * @param source
+//   */
+//  public Latent(Latent source) {
+//
+//    super(source.getChromosomeLength());
+//    this.id = UUID.randomUUID();
+//    IntStream.range(0, this.getChromosomeLength())
+//            .forEach(i -> this.setGene(i, source.getGene(i)));
+//  }
 
   public Latent(int chromosomeLength) {
 
