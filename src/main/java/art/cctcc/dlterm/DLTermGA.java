@@ -152,7 +152,7 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
   }
 
   /**
-   * This is not functional because in DLTerm fitness is given by input.
+   * In DLTerm fitness is given by input.
    *
    * @param individual
    * @return
@@ -160,6 +160,6 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
   @Override
   public double calcFitness(Latent individual) {
 
-    throw new UnsupportedOperationException("calcFitness is not functional because fitness is given by input");
+    return individual.getFitness();
   }
 }
