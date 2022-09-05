@@ -43,7 +43,7 @@ abstract public class Population<I extends Individual> {
    */
   synchronized public I getFittest(int offset) {
     // Order population by fitness
-    Arrays.sort(this.population, Comparator.comparing(Individual::getFitness, Comparator.reverseOrder()));
+    Arrays.sort(this.population, Comparator.comparing(Individual::getFitness));
     // Return the fittest individual
     return this.population[offset];
   }
