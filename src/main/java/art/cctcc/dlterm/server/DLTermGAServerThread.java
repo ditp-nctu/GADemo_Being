@@ -69,20 +69,8 @@ public class DLTermGAServerThread {
       latent.setFitness(eval);
     }
     ga.evalPopulation(population);
-//    for (int i = 0; i < this.population.size(); i++) {
-//      var individual = population.getFittest(i);
-//      if (i < ga.getElitismCount())
-//        individual.setElite(true);
-//      else {
-//        individual.setElite(false);
-//        var latent_code = DoubleStream.generate(r::nextGaussian)
-//                .limit(individual.getChromosomeLength())
-//                .toArray();
-//        individual.encodeGenes(latent_code);
-//      }
-//    }
-    //    this.population = ga.crossoverPopulation(this.population);
-    this.population = ga.mutatePopulation(this.population);
+    this.population = ga.crossoverPopulation(this.population);
+//    this.population = ga.mutatePopulation(this.population);
     return ga.isTerminationConditionMet(population);
   }
 }
