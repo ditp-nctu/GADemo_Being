@@ -1,4 +1,4 @@
-# DLTerm GA API v0.1
+# DLTerm GA API v0.2
 
 by Chun-yien Chang
 
