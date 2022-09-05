@@ -61,7 +61,7 @@ public class DLTermGAServerThread {
   public boolean run(JsonArray eval) {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
-    for (int i = 0; i < eval.size(); i++) {
+    for (int i = 0; i < this.population.size(); i++) {
       this.population.getIndividual(i).setFitness(eval.getDouble(i));
     }
     ga.evalPopulation(population);
