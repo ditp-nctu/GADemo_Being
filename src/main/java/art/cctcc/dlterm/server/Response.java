@@ -15,7 +15,6 @@
  */
 package art.cctcc.dlterm.server;
 
-import java.util.Arrays;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -35,17 +34,17 @@ public class Response {
       var latent = session.getPopulation().getFittest(i);
       var joLatent = new JSONObject()
               .put("id", latent.getId())
-              .put("code", latent.decodeGenes())
-              .put("qualified", session.getGa().qualifier.test(latent));
+              .put("latent_code", latent.decodeGenes());
+//              .put("qualified", session.getGa().qualifier.test(latent));
       population.append(joLatent);
     }
     this.jo = new JSONObject()
             .put("session_id", session.getSession_id())
             .put("query", query)
-            .put("terminated", session.isTerminated())
+//            .put("terminated", session.isTerminated())
             .put("generation", session.getGeneration())
             .put("population", population)
-            .put("qualifiedCount", session.getQualifiedCount())
+//            .put("qualifiedCount", session.getQualifiedCount())
             .put("message", msg);
   }
 
