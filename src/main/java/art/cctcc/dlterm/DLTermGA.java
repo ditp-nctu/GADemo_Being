@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
+ * Copyright 2022 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package art.cctcc.dlterm;
 
 import static art.cctcc.c1642.being.Constants.*;
 import ga.real.GeneticAlgorithm;
-import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
@@ -87,7 +86,6 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
                 }
                 newPopulation.setIndividual(populationIndex, offspring);
                 crossoverCounter++;
-//        System.out.printf("X %s\n", offspring.getInfo());
             }
         }
         System.out.print(" crossoverCounter=" + crossoverCounter);
@@ -120,7 +118,6 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
                 }
                 newPopulation.setIndividual(populationIndex, newLatent);
                 mutationCounter++;
-//        System.out.printf("\n! %s", newLatent.getInfo());
             }
         }
         System.out.print((mutationCounter > 0) ? "\n" : "");

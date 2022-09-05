@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2021 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
+ * Copyright 2022 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,6 @@ public class DLTermGAServerThread {
     ga.evalPopulation(population);
     this.population = ga.crossoverPopulation(this.population);
     this.population = ga.mutatePopulation(this.population);
-    return ga.isTerminationConditionMet(population);
+    return evals.containsKey("terminate"); //ga.isTerminationConditionMet(population)
   }
 }

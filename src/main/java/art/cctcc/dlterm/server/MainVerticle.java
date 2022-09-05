@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
+ * Copyright 2022 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ import java.util.Objects;
 
 public class MainVerticle extends AbstractVerticle {
 
-  static final Logger logger = Logger.getGlobal();
-  static final Map<String, DLTermGAServerThread> sessions = new HashMap<>();
-  int port = 8001;
+  private static final Logger LOGGER = Logger.getGlobal();
+  private static final Map<String, DLTermGAServerThread> SESSIONS = new HashMap<>();
+  private static final int PORT = 8001;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -52,8 +52,8 @@ public class MainVerticle extends AbstractVerticle {
             .handler(this::_DLGA);
     vertx.createHttpServer()
             .requestHandler(router)
-            .listen(port);
-    logger.log(Level.INFO, " Server started on port {0}", port);
+            .listen(PORT);
+    LOGGER.log(Level.INFO, " Server started on port {0}", PORT);
   }
 
   public void _DLGA(RoutingContext ctx) {
@@ -62,11 +62,10 @@ public class MainVerticle extends AbstractVerticle {
     var session_id = ctx.pathParam("session_id");
     System.out.println("Accepting request: session_id=" + session_id);
 
-    //var queryParams = ctx.queryParams();
-    var thread = sessions.get(session_id);
+    var thread = SESSIONS.get(session_id);
     JsonObject eval = null;
     try {
-      var content = ctx.getBodyAsJson();
+      var content = ctx.body().asJsonObject();
       if (Objects.isNull(thread)) {
         var latent_size = content.getInteger("latent_size");
         var population_size = content.getInteger("population_size", DefaultPopulationSize);
@@ -74,33 +73,35 @@ public class MainVerticle extends AbstractVerticle {
         var crossover_rate = content.getDouble("crossover_rate", DefaultCrossoverRate);
         var elitism_count = content.getInteger("elitism_count", population_size / 3);
 
-        System.out.println("Creating new GA session.");
-        System.out.println("latent_size = " + latent_size);
-        System.out.println("population_size = " + population_size);
-        System.out.println("mutation_rate = " + mutation_rate);
-        System.out.println("crossover_rate = " + crossover_rate);
-        System.out.println("elitism_count = " + elitism_count);
+        LOGGER.log(Level.INFO, "Creating new GA session.");
+        LOGGER.log(Level.INFO, "latent_size = {0}", latent_size);
+        LOGGER.log(Level.INFO, "population_size = {0}", population_size);
+        LOGGER.log(Level.INFO, "mutation_rate = {0}", mutation_rate);
+        LOGGER.log(Level.INFO, "crossover_rate = {0}", crossover_rate);
+        LOGGER.log(Level.INFO, "elitism_count = {0}", elitism_count);
 
         thread = new DLTermGAServerThread(session_id, population_size,
                 mutation_rate, crossover_rate, latent_size, elitism_count);
-        sessions.put(session_id, thread);
+        SESSIONS.put(session_id, thread);
       } else {
         eval = content.getJsonObject("eval", null);
         if (Objects.nonNull(eval)) {
           if (eval.size() < thread.getGa().getPopulationSize())
             throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
-          System.out.println("Eval size = " + eval.size());
+          LOGGER.log(Level.INFO, "Eval size = {0}", eval.size());
         }
       }
     } catch (Exception ex) {
       msg = ex.getMessage();
       ex.printStackTrace();
-      System.out.println("Exception: " + msg);
+      LOGGER.log(Level.WARNING, "Exception: {0}", msg);
     }
     var response = thread.getResponse(ctx.request().query(), msg, eval);
-    logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
-    if (response.toString() == null)
-      System.out.println(response.jo);
+    LOGGER.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
+    if (thread.isTerminated()) {
+      LOGGER.log(Level.INFO, " session terminated, session_id = {0}", thread.getSession_id());
+      SESSIONS.remove(thread.getSession_id());
+    }
     ctx.response()
             .putHeader("content-type", "application/json")
             .end(Buffer.buffer(response.toString()));

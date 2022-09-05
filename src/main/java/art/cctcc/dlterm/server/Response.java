@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
+ * Copyright 2022 Jonathan Chang, Chun-yien <ccy@musicapoetica.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package art.cctcc.dlterm.server;
 
-import java.util.Arrays;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -36,8 +35,6 @@ public class Response {
       var joLatent = new JSONObject()
               .put("id", latent.getId())
               .put("latent_code", latent.decodeGenes());
-//              .put("elite", latent.isElite());
-//              .put("chromosome", latent.getChromosomeCompact());
       population.append(joLatent);
     }
     this.jo = new JSONObject()
