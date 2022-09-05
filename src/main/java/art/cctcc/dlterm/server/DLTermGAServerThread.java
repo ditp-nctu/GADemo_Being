@@ -16,10 +16,12 @@
  */
 package art.cctcc.dlterm.server;
 
+import art.cctcc.dlterm.Latent;
 import art.cctcc.dlterm.DLTermGA;
 import art.cctcc.dlterm.LatentPopulation;
 import io.vertx.core.json.JsonArray;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import lombok.Getter;
 
 /**
