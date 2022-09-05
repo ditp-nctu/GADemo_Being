@@ -15,10 +15,11 @@
  */
 package art.cctcc.dlterm;
 
-import java.math.BigInteger;
+import static art.cctcc.c1642.being.Constants.r;
+import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
 public class LatentTest {
-
-  static Random RAND = new Random();
 
   public LatentTest() {
   }
@@ -57,8 +56,8 @@ public class LatentTest {
   public void testEncodeGenes() {
     System.out.println("encodeGenes");
     Latent instance = new Latent(10);
-    double[] latent_code = DoubleStream.generate(RAND::nextGaussian)
-            .limit(instance.getLatentLength())
+    double[] latent_code = DoubleStream.generate(r::nextGaussian)
+            .limit(instance.getChromosomeLength())
             .toArray();
     instance.encodeGenes(latent_code);
     double[] result = instance.decodeGenes();
@@ -73,7 +72,7 @@ public class LatentTest {
     System.out.println("decodeGenes");
     Latent instance = new Latent(10);
     double[] expResult = DoubleStream.generate(Math::random)
-            .limit(instance.getLatentLength())
+            .limit(instance.getChromosomeLength())
             .map(s -> s * 1000)
             .toArray();
     instance.encodeGenes(expResult);
@@ -107,17 +106,5 @@ public class LatentTest {
     assertEquals(expResult, result);
     // TODO review the generated test code and remove the default call to fail.
     fail("The test case is a prototype.");
-  }
-
-  /**
-   * Test of getLatentLength method, of class Latent.
-   */
-  @Test
-  public void testGetLatentLength() {
-    System.out.println("getLatentLength");
-    Latent instance = new Latent(10);
-    int expResult = 10;
-    int result = instance.getLatentLength();
-    assertEquals(expResult, result);
   }
 }

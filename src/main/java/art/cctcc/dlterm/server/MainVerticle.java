@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -84,8 +85,11 @@ public class MainVerticle extends AbstractVerticle {
         sessions.put(session_id, thread);
       } else {
         eval = content.getJsonArray("eval", null);
-        if (Objects.nonNull(eval) && eval.size() != thread.getGa().getPopulationSize())
-          throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
+        if (Objects.nonNull(eval)) {
+          if (eval.size() != thread.getGa().getPopulationSize())
+            throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
+          System.out.println("Eval size = " + eval.size());
+        }
       }
     } catch (Exception ex) {
       msg = ex.getMessage();
@@ -94,8 +98,10 @@ public class MainVerticle extends AbstractVerticle {
     }
     var response = thread.getResponse(ctx.request().query(), msg, eval);
     logger.log(Level.INFO, " response session_id = {0}", thread.getSession_id());
+    if (response.toString() == null)
+      System.out.println(response.jo);
     ctx.response()
             .putHeader("content-type", "application/json")
-            .end(response.toString());
+            .end(Buffer.buffer(response.toString()));
   }
 }

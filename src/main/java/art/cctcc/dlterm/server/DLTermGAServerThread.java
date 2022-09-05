@@ -37,7 +37,6 @@ public class DLTermGAServerThread {
   private int generation;
   private LatentPopulation population;
   private boolean terminated;
-//  private long qualifiedCount;
 
   public DLTermGAServerThread(String session_id, int populationSize,
           double mutationRate, double crossoverRate,
@@ -53,8 +52,7 @@ public class DLTermGAServerThread {
 
   public Response getResponse(String query, String msg, JsonArray eval) {
 
-    if (!this.terminated && Objects.nonNull(eval)
-            && this.ga.getPopulationSize() == eval.size()) {
+    if (!this.terminated && Objects.nonNull(eval)) {
       this.terminated = this.run(eval);
     }
     return new Response(this, query, msg);
@@ -64,16 +62,13 @@ public class DLTermGAServerThread {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
     for (int i = 0; i < eval.size(); i++) {
-        this.population.getIndividual(i).setFitness(eval.getDouble(i));
+      this.population.getIndividual(i).setFitness(eval.getDouble(i));
     }
     ga.evalPopulation(population);
     this.population = ga.crossoverPopulation(this.population);
     this.population = ga.mutatePopulation(this.population);
     System.out.println();
-    
-//    this.qualifiedCount = ga.getQualifiedCount(population);
-//    System.out.printf(" Elitism population: %d/%d/%d)\n",
-//            this.qualifiedCount, ga.getElitismCount(), ga.getPopulationSize());
+
     return ga.isTerminationConditionMet(population);
   }
 }

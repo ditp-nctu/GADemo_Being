@@ -15,6 +15,7 @@
  */
 package art.cctcc.dlterm.server;
 
+import java.util.Arrays;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -28,30 +29,30 @@ public class Response {
 
   public Response(DLTermGAServerThread session, String query, String msg) {
 
+    System.out.println("Constructing Response...");
     var population = new JSONArray();
-//    for (int i = 0; i < session.getGa().getElitismCount(); i++) {
     for (int i = 0; i < session.getGa().getPopulationSize(); i++) {
-      var latent = session.getPopulation().getFittest(i);
+      var latent = session.getPopulation().getIndividual(i);
       var joLatent = new JSONObject()
               .put("id", latent.getId())
               .put("latent_code", latent.decodeGenes())
               .put("chromosome", latent.getChromosomeCompact());
-//              .put("qualified", session.getGa().qualifier.test(latent));
+      if (Arrays.toString(latent.decodeGenes()).contains("NaN"))
+        System.out.println("** latent_code contains NaN.");
       population.append(joLatent);
     }
+    var test = population.format(2);
     this.jo = new JSONObject()
             .put("session_id", session.getSession_id())
             .put("query", query)
-//            .put("terminated", session.isTerminated())
             .put("generation", session.getGeneration())
             .put("population", population)
-//            .put("qualifiedCount", session.getQualifiedCount())
             .put("message", msg);
   }
 
   @Override
   public String toString() {
 
-    return jo.toString();
+    return jo.format(2);
   }
 }

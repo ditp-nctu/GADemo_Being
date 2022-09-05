@@ -16,9 +16,9 @@
 package art.cctcc.dlterm;
 
 import static art.cctcc.c1642.being.Constants.*;
-import ga.chapter2.GeneticAlgorithm;
+import ga.real.GeneticAlgorithm;
+import java.util.Arrays;
 import java.util.Random;
-import java.util.function.Predicate;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -29,7 +29,6 @@ import java.util.stream.Stream;
  */
 public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
-//  public final Predicate<Latent> qualifier;
   private final int latent_size;
 
   public DLTermGA(int populationSize, double mutationRate, double crossoverRate,
@@ -37,7 +36,6 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
 
     super(populationSize, mutationRate, crossoverRate, elitismCount);
     this.latent_size = latent_size;
-//    this.qualifier = latent -> false;
   }
 
   @Override
@@ -45,14 +43,13 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
     // Initialize population
     var population = new LatentPopulation(this.populationSize);
 
-    var rand = new Random();
     for (int individualCount = 0; individualCount < this.populationSize; individualCount++) {
       var individual = Stream.generate(() -> new Latent(this.latent_size))
               .findAny()
               .get();
 
-      var latent_code = DoubleStream.generate(rand::nextGaussian)
-              .limit(individual.getLatentLength())
+      var latent_code = DoubleStream.generate(r::nextGaussian)
+              .limit(individual.getChromosomeLength())
               .toArray();
       individual.encodeGenes(latent_code);
       population.setIndividual(individualCount, individual);
@@ -63,16 +60,8 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
   @Override
   public boolean isTerminationConditionMet(LatentPopulation population) {
 
-    return false; //getQualifiedCount(population) == elitismCount;
+    return false;
   }
-
-//  public long getQualifiedCount(LatentPopulation population) {
-//
-//    return IntStream.range(0, elitismCount)
-//            .mapToObj(i -> population.getFittest(i))
-//            .filter(qualifier)
-//            .count();
-//  }
 
   public double getElitismFitnessAverage(LatentPopulation population) {
 
@@ -106,10 +95,11 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
           }
           offspring.setGene(geneIndex, (usingFirst ? parent1 : parent2).getGene(geneIndex));
         }
-        offspring.decodeGenes();
+        if (Arrays.toString(offspring.decodeGenes()).contains("NaN"))
+          System.out.println("NaN Warning.");
         newPopulation.setIndividual(populationIndex, offspring);
         crossoverCounter++;
-        System.out.printf("X %s\n", offspring.getInfo());
+//        System.out.printf("X %s\n", offspring.getInfo());
       }
     }
     System.out.print(" crossoverCounter=" + crossoverCounter);
@@ -134,16 +124,16 @@ public class DLTermGA extends GeneticAlgorithm<LatentPopulation, Latent> {
                 .toList();
         for (int geneIndex = 0; geneIndex < latent.getChromosomeLength(); geneIndex++) {
           if (mutationCites.contains(geneIndex)) {
-            int newGene = (latent.getGene(geneIndex) == 1) ? 0 : 1;
+            double newGene = latent.getGene(geneIndex)
+                    + r.nextGaussian(0, Math.abs(latent.getGene(geneIndex) / 2));
             newLatent.setGene(geneIndex, newGene);
           } else {
             newLatent.setGene(geneIndex, latent.getGene(geneIndex));
           }
         }
-        newLatent.decodeGenes();
         newPopulation.setIndividual(populationIndex, newLatent);
         mutationCounter++;
-        System.out.printf("\n! %s", newLatent.getInfo());
+//        System.out.printf("\n! %s", newLatent.getInfo());
       }
     }
     System.out.print((mutationCounter > 0) ? "\n" : "");
