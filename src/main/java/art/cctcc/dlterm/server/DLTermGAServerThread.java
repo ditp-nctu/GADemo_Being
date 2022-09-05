@@ -19,6 +19,7 @@ package art.cctcc.dlterm.server;
 import art.cctcc.dlterm.DLTermGA;
 import art.cctcc.dlterm.LatentPopulation;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import java.util.Objects;
 import lombok.Getter;
 
@@ -48,7 +49,7 @@ public class DLTermGAServerThread {
     ga.evalPopulation(population);
   }
 
-  public Response getResponse(String query, String msg, JsonArray eval) {
+  public Response getResponse(String query, String msg, JsonObject eval) {
 
     if (!this.terminated && Objects.nonNull(eval)) {
       this.terminated = this.run(eval);
@@ -56,11 +57,12 @@ public class DLTermGAServerThread {
     return new Response(this, query, msg);
   }
 
-  public boolean run(JsonArray eval) {
+  public boolean run(JsonObject eval) {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
     for (int i = 0; i < this.population.size(); i++) {
-      this.population.getIndividual(i).setFitness(eval.getDouble(i));
+        var latent = this.population.getIndividual(i);
+        latent.setFitness(eval.getDouble(latent.getId().toString()));
     }
     ga.evalPopulation(population);
     this.population = ga.crossoverPopulation(this.population);

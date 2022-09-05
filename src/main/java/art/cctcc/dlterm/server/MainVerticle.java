@@ -23,6 +23,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -63,7 +64,7 @@ public class MainVerticle extends AbstractVerticle {
 
     //var queryParams = ctx.queryParams();
     var thread = sessions.get(session_id);
-    JsonArray eval = null;
+    JsonObject eval = null;
     try {
       var content = ctx.getBodyAsJson();
       if (Objects.isNull(thread)) {
@@ -84,7 +85,7 @@ public class MainVerticle extends AbstractVerticle {
                 mutation_rate, crossover_rate, latent_size, elitism_count);
         sessions.put(session_id, thread);
       } else {
-        eval = content.getJsonArray("eval", null);
+        eval = content.getJsonObject("eval", null);
         if (Objects.nonNull(eval)) {
           if (eval.size() < thread.getGa().getPopulationSize())
             throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
