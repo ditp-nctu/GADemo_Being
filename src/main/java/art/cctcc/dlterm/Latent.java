@@ -13,7 +13,7 @@ import lombok.Setter;
 public class Latent extends Individual {
 
   private final UUID id;
-  private boolean elite;
+//  private boolean elite;
 
   public Latent(UUID id, int chromosomeLength) {
 

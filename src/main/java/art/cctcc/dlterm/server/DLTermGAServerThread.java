@@ -52,36 +52,37 @@ public class DLTermGAServerThread {
     ga.evalPopulation(population);
   }
 
-  public Response getResponse(String query, String msg, JsonObject eval) {
+  public Response getResponse(String query, String msg, JsonObject evals) {
 
-    if (!this.terminated && Objects.nonNull(eval)) {
-      this.terminated = this.run(eval);
+    if (!this.terminated && Objects.nonNull(evals)) {
+      this.terminated = this.run(evals);
     }
     return new Response(this, query, msg);
   }
 
-  public boolean run(JsonObject eval) {
+  public boolean run(JsonObject evals) {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
     for (int i = 0; i < this.population.size(); i++) {
       var latent = this.population.getIndividual(i);
-      latent.setFitness(eval.getDouble(latent.getId().toString()));
+      var eval = evals.getDouble(latent.getId().toString());
+      latent.setFitness(eval);
     }
     ga.evalPopulation(population);
-    for (int i = 0; i < this.population.size(); i++) {
-      var individual = population.getFittest(i);
-      if (i < ga.getElitismCount())
-        individual.setElite(true);
-      else {
-        individual.setElite(false);
-        var latent_code = DoubleStream.generate(r::nextGaussian)
-                .limit(individual.getChromosomeLength())
-                .toArray();
-        individual.encodeGenes(latent_code);
-      }
-    }
+//    for (int i = 0; i < this.population.size(); i++) {
+//      var individual = population.getFittest(i);
+//      if (i < ga.getElitismCount())
+//        individual.setElite(true);
+//      else {
+//        individual.setElite(false);
+//        var latent_code = DoubleStream.generate(r::nextGaussian)
+//                .limit(individual.getChromosomeLength())
+//                .toArray();
+//        individual.encodeGenes(latent_code);
+//      }
+//    }
     //    this.population = ga.crossoverPopulation(this.population);
-    //    this.population = ga.mutatePopulation(this.population);
+    this.population = ga.mutatePopulation(this.population);
     return ga.isTerminationConditionMet(population);
   }
 }

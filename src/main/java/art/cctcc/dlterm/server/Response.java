@@ -35,8 +35,8 @@ public class Response {
       var latent = session.getPopulation().getIndividual(i);
       var joLatent = new JSONObject()
               .put("id", latent.getId())
-              .put("latent_code", latent.decodeGenes())
-              .put("elite", latent.isElite());
+              .put("latent_code", latent.decodeGenes());
+//              .put("elite", latent.isElite());
 //              .put("chromosome", latent.getChromosomeCompact());
       population.append(joLatent);
     }
