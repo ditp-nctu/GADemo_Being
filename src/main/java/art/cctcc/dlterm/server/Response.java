@@ -34,7 +34,8 @@ public class Response {
       var latent = session.getPopulation().getFittest(i);
       var joLatent = new JSONObject()
               .put("id", latent.getId())
-              .put("latent_code", latent.decodeGenes());
+              .put("latent_code", latent.decodeGenes())
+              .put("chromosome", latent.getChromosomeCompact());
 //              .put("qualified", session.getGa().qualifier.test(latent));
       population.append(joLatent);
     }
