@@ -16,11 +16,14 @@
  */
 package art.cctcc.dlterm.server;
 
+import static art.cctcc.c1642.being.Constants.r;
 import art.cctcc.dlterm.DLTermGA;
+import art.cctcc.dlterm.Latent;
 import art.cctcc.dlterm.LatentPopulation;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Objects;
+import java.util.stream.DoubleStream;
 import lombok.Getter;
 
 /**
@@ -61,14 +64,19 @@ public class DLTermGAServerThread {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
     for (int i = 0; i < this.population.size(); i++) {
-        var latent = this.population.getIndividual(i);
-        latent.setFitness(eval.getDouble(latent.getId().toString()));
+      var latent = this.population.getIndividual(i);
+      latent.setFitness(eval.getDouble(latent.getId().toString()));
     }
     ga.evalPopulation(population);
-    this.population = ga.crossoverPopulation(this.population);
-    this.population = ga.mutatePopulation(this.population);
-    System.out.println();
-
+    for (int i = ga.getElitismCount(); i < this.population.size(); i++) {
+      var individual = population.getFittest(i);
+      var latent_code = DoubleStream.generate(r::nextGaussian)
+              .limit(individual.getChromosomeLength())
+              .toArray();
+      individual.encodeGenes(latent_code);
+    }
+    //    this.population = ga.crossoverPopulation(this.population);
+    //    this.population = ga.mutatePopulation(this.population);
     return ga.isTerminationConditionMet(population);
   }
 }
