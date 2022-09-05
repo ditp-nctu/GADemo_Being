@@ -22,6 +22,7 @@ http://ccy.nclab.tw:8001/dlterm
     "population_size": 200, // Optional
     "mutation_rate": 0.95, // Optional
     "crossover_rate": 0.95, // Optional
+    "elitism_count": 50, // Optional
 }
 ```
 

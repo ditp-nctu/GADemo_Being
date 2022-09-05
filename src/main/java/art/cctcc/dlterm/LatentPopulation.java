@@ -16,6 +16,7 @@
 package art.cctcc.dlterm;
 
 import ga.chapter2.Population;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -26,5 +27,12 @@ public class LatentPopulation extends Population<Latent> {
   public LatentPopulation(int populationSize) {
 
     this.population = new Latent[populationSize];
+  }
+
+  public void eliminate(int elitismCount) {
+    
+    this.population = IntStream.range(0, elitismCount)
+            .mapToObj(this::getFittest)
+            .toArray(Latent[]::new);
   }
 }

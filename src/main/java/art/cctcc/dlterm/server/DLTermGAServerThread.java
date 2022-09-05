@@ -37,7 +37,7 @@ public class DLTermGAServerThread {
   private int generation;
   private LatentPopulation population;
   private boolean terminated;
-  private long qualifiedCount;
+//  private long qualifiedCount;
 
   public DLTermGAServerThread(String session_id, int populationSize,
           double mutationRate, double crossoverRate,
@@ -55,29 +55,25 @@ public class DLTermGAServerThread {
 
     if (!this.terminated && Objects.nonNull(eval)
             && this.ga.getPopulationSize() == eval.size()) {
-      for (int i = 0; i < eval.size(); i++) {
-        this.population.getIndividual(i).setFitness(eval.getDouble(i));
-      }
-      this.terminated = this.run();
+      this.terminated = this.run(eval);
     }
     return new Response(this, query, msg);
   }
 
-  public boolean run() {
+  public boolean run(JsonArray eval) {
 
     System.out.printf("========== generation#%d ==========\n", ++generation);
-    population = ga.crossoverPopulation(population);
-    population = ga.mutatePopulation(population);
-    System.out.println();
+    for (int i = 0; i < eval.size(); i++) {
+        this.population.getIndividual(i).setFitness(eval.getDouble(i));
+    }
     ga.evalPopulation(population);
-    IntStream.range(0, ga.getElitismCount())
-            .mapToObj(population::getFittest)
-            //.sorted(Comparator.comparing(Latent::getSize))
-            .map(Latent::getInfo)
-            .forEach(System.out::println);
-    this.qualifiedCount = ga.getQualifiedCount(population);
-    System.out.printf(" Elitism population: %d/%d/%d)\n",
-            this.qualifiedCount, ga.getElitismCount(), ga.getPopulationSize());
+    this.population = ga.crossoverPopulation(this.population);
+    this.population = ga.mutatePopulation(this.population);
+    System.out.println();
+    
+//    this.qualifiedCount = ga.getQualifiedCount(population);
+//    System.out.printf(" Elitism population: %d/%d/%d)\n",
+//            this.qualifiedCount, ga.getElitismCount(), ga.getPopulationSize());
     return ga.isTerminationConditionMet(population);
   }
 }

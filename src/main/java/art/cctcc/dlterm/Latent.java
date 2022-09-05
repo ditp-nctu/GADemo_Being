@@ -89,7 +89,9 @@ public class Latent extends Individual {
 
   public String getInfo() {
 
-    var info = this.getChromosomeCompact();
+    var info = String.format("[%s] (%s)",
+            this.getChromosomeCompact(),
+            this.getId());
     return info;
   }
 }

@@ -65,14 +65,12 @@ public class MainVerticle extends AbstractVerticle {
     JsonArray eval = null;
     try {
       var content = ctx.getBodyAsJson();
-      System.out.println(content.fieldNames());
       if (Objects.isNull(thread)) {
         var latent_size = content.getInteger("latent_size");
         var population_size = content.getInteger("population_size", DefaultPopulationSize);
         var mutation_rate = content.getDouble("mutation_rate", DefaultMutationRate);
         var crossover_rate = content.getDouble("crossover_rate", DefaultCrossoverRate);
-        var elitism_count = content.getInteger("elitism_count",
-                population_size * 30 / 100);
+        var elitism_count = content.getInteger("elitism_count", population_size / 3);
 
         System.out.println("Creating new GA session.");
         System.out.println("latent_size = " + latent_size);
@@ -86,7 +84,7 @@ public class MainVerticle extends AbstractVerticle {
         sessions.put(session_id, thread);
       } else {
         eval = content.getJsonArray("eval", null);
-        if (Objects.nonNull(eval) && eval.size() != thread.getPopulation().size())
+        if (Objects.nonNull(eval) && eval.size() != thread.getGa().getPopulationSize())
           throw new InvalidEvalSizeException(thread.getPopulation().size(), eval.size());
       }
     } catch (Exception ex) {
