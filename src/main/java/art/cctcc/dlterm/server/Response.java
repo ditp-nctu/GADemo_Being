@@ -35,13 +35,12 @@ public class Response {
       var latent = session.getPopulation().getIndividual(i);
       var joLatent = new JSONObject()
               .put("id", latent.getId())
-              .put("latent_code", latent.decodeGenes())
-              .put("chromosome", latent.getChromosomeCompact());
+              .put("latent_code", latent.decodeGenes());
+//              .put("chromosome", latent.getChromosomeCompact());
       if (Arrays.toString(latent.decodeGenes()).contains("NaN"))
         System.out.println("** latent_code contains NaN.");
       population.append(joLatent);
     }
-    var test = population.format(2);
     this.jo = new JSONObject()
             .put("session_id", session.getSession_id())
             .put("query", query)

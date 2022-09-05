@@ -70,7 +70,7 @@ http://ccy.nclab.tw:8001/dlterm
         0.7035394199858056,
         1.2071775719979683,
         ...
-    ], // Evaluation of each individual, must match population size (required)
+    ] // Evaluation of each individual, must match population size (required)
 }
 ```
 
