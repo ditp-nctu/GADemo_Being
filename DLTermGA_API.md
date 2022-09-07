@@ -2,10 +2,6 @@
 
 by Chun-yien Chang
 
-## API base url
-
-- `http://ccy.nclab.tw:8001/dl`
-
 ## Initiation
 
 - Format: `{base url}/:token`
@@ -110,8 +106,9 @@ import matplotlib.pyplot as plt
 def evaluation(latent_code): # To be implemented
     return np.abs(np.average(latent_code)-10)
 
+base_url = 'http://your.own.address/'
 token = 'MyToken'
-url = "http://ccy.nclab.tw:8001/dl/%s" % token
+url = "%s%s" % (base_url, token)
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 elitism_count = 20
 
